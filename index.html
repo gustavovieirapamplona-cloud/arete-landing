@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Areté — corpo e mente, o ideal grego</title>
+<meta name="description" content="Grupo de jovens que treinam o corpo e a cabeça na mesma semana. Leitura dos clássicos, treino discutido a sério, cobrança entre pares. R$5 por mês.">
+<link rel="canonical" href="https://gustavopamplona.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gustavopamplona.com/">
+<meta property="og:title" content="Areté — corpo e mente, o ideal grego">
+<meta property="og:description" content="Só academia faz o selvagem. Só livro faz o mole. Grupo de jovens que treina os dois. R$5 por mês.">
+<meta property="og:image" content="https://gustavopamplona.com/gustavo.jpg">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230E0E0E'/%3E%3Ctext x='50' y='72' font-size='68' font-family='Georgia,serif' fill='%23FA3B2D' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0E0E0E;
+  --fg:#FAFAF7;
+  --red:#FA3B2D;
+  --muted:#9A9A94;
+  --line:rgba(250,250,247,.13);
+  --panel:rgba(250,250,247,.035);
+  --maxw:720px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+section{padding:72px 0;border-top:1px solid var(--line)}
+section.hero{border-top:0}
+
+h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:700;line-height:1.12;letter-spacing:-.01em}
+h1{font-size:clamp(2.3rem,8vw,3.6rem)}
+h2{font-size:clamp(1.75rem,5.5vw,2.4rem);margin-bottom:26px}
+h3{font-size:1.15rem;font-family:'Archivo',sans-serif;font-weight:700;line-height:1.35}
+p{margin-bottom:1.1em}
+p:last-child{margin-bottom:0}
+
+.eyebrow{
+  font-size:.74rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--red);margin-bottom:26px;
+}
+.lead{font-size:1.12rem;color:var(--muted);margin-top:26px;max-width:34em}
+
+/* ---------- hero ---------- */
+.hero{padding:96px 0 84px}
+.hero h1 em{font-style:italic}
+.cta-row{margin-top:40px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.cta-row .note{font-size:.88rem;color:var(--muted)}
+
+.btn{
+  display:inline-block;
+  background:var(--red);color:#fff;
+  font-weight:700;font-size:1.02rem;
+  padding:16px 34px;border-radius:4px;
+  text-decoration:none;
+  transition:transform .12s ease,filter .12s ease;
+}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+
+/* ---------- citacao ---------- */
+blockquote{
+  border-left:3px solid var(--red);
+  padding:4px 0 4px 22px;
+  margin:34px 0;
+}
+blockquote p{
+  font-family:'Playfair Display',Georgia,serif;
+  font-style:italic;font-size:1.24rem;line-height:1.45;
+  margin-bottom:.6em;
+}
+blockquote cite{
+  font-family:'Archivo',sans-serif;font-style:normal;
+  font-size:.84rem;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* ---------- o que acontece ---------- */
+.items{display:grid;gap:30px;margin-top:12px}
+.item{border-left:2px solid var(--line);padding-left:20px}
+.item h3{margin-bottom:8px}
+.item p{color:var(--muted);font-size:.98rem}
+
+/* ---------- filtro ---------- */
+.cols{display:grid;gap:34px}
+@media(min-width:680px){.cols{grid-template-columns:1fr 1fr;gap:40px}}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:26px 24px}
+.col h3{margin-bottom:16px;font-size:1.05rem;letter-spacing:.02em}
+.col.no h3{color:var(--red)}
+.col ul{list-style:none}
+.col li{
+  position:relative;padding-left:24px;margin-bottom:13px;
+  font-size:.97rem;color:var(--muted);line-height:1.55;
+}
+.col li:last-child{margin-bottom:0}
+.col li::before{position:absolute;left:0;top:0;font-weight:700}
+.col.yes li::before{content:"\2014";color:var(--fg)}
+.col.no li::before{content:"\00D7";color:var(--red)}
+
+/* ---------- quem conduz ---------- */
+.video{
+  width:100%;display:block;
+  aspect-ratio:2800/1604;
+  border-radius:8px;border:1px solid var(--line);
+  background:#000;
+}
+.video-cap{margin-top:12px;font-size:.86rem;color:var(--muted)}
+.who{margin-top:30px}
+.who .name{font-weight:700;font-size:1.1rem}
+.who .handle{color:var(--muted);font-size:.92rem;margin-bottom:12px}
+.who p{font-size:.98rem;color:var(--muted)}
+
+/* ---------- preco ---------- */
+.price-box{
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:38px 28px;text-align:center;
+}
+.price{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(2.6rem,10vw,3.6rem);line-height:1}
+.price span{font-size:1.1rem;font-family:'Archivo',sans-serif;font-weight:500;color:var(--muted)}
+.billed{margin-top:14px;font-size:.97rem;color:var(--muted)}
+.price-box .btn{margin-top:26px}
+.paylogos{margin-top:16px;font-size:.83rem;color:var(--muted);letter-spacing:.02em}
+
+/* ---------- faq ---------- */
+details{border-bottom:1px solid var(--line);padding:18px 0}
+details:first-of-type{border-top:1px solid var(--line)}
+summary{
+  cursor:pointer;font-weight:600;font-size:1.02rem;list-style:none;
+  display:flex;justify-content:space-between;gap:16px;align-items:baseline;
+}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--red);font-weight:700;font-size:1.3rem;line-height:1;flex:none}
+details[open] summary::after{content:"\2013"}
+details p{margin-top:12px;color:var(--muted);font-size:.97rem}
+
+/* ---------- rodape ---------- */
+footer{
+  border-top:1px solid var(--line);padding:38px 0 54px;
+  font-size:.87rem;color:var(--muted);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+footer a:hover{color:var(--fg)}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Areté</div>
+    <h1>Só academia faz o <em>selvagem</em>.<br>Só livro faz o <em>mole</em>.</h1>
+    <p class="lead">Platão escreveu isso há vinte e quatro séculos e continua descrevendo a tua geração com precisão constrangedora. Areté é um grupo de jovens que treina as duas coisas na mesma semana — o corpo e a cabeça.</p>
+    <div class="cta-row">
+      <a class="btn" href="#entrar">Quero entrar — R$5/mês</a>
+      <span class="note">Grupo no WhatsApp · vagas abertas</span>
+    </div>
+  </section>
+</div>
+
+<!-- ============ O INCÔMODO ============ -->
+<div class="wrap">
+  <section>
+    <h2>Você conhece os dois caras.</h2>
+    <p>O primeiro puxa 140 no supino e não termina um livro desde o ensino médio. Sabe o nome de sete suplementos e de nenhum filósofo. Está construindo com muito esforço um corpo sobre o qual ninguém vai perguntar o que ele pensa.</p>
+    <p>O segundo leu Nietzsche inteiro, cita Dostoiévski no grupo da faculdade e não sobe dois lances de escada sem parar no patamar. Tem opinião formada sobre tudo e postura de quem pede desculpa por ocupar espaço.</p>
+    <p>Nenhum dos dois teria o respeito de um grego.</p>
+
+    <blockquote>
+      <p>Quem se entrega só à ginástica torna-se mais selvagem do que devia; quem se entrega só à música, mais mole do que lhe convém.</p>
+      <cite>Platão · A República, livro III, 410d</cite>
+    </blockquote>
+
+    <p>A palavra que os gregos usavam para o homem inteiro era <em>kalòs kagathós</em>: belo e bom. Belo de corpo, bom de caráter — e não existia ter um sem o outro. Não era metáfora nem exagero de poeta. Era o padrão mínimo esperado de um cidadão adulto.</p>
+    <p>A gente separou as duas coisas e chamou isso de especialização. <em>Areté</em> é a palavra deles para excelência: o que uma coisa se torna quando cumpre inteiramente aquilo que é. Um grupo com esse nome não podia treinar metade de você.</p>
+  </section>
+</div>
+
+<!-- ============ O QUE ACONTECE ============ -->
+<div class="wrap">
+  <section>
+    <h2>O que acontece lá dentro</h2>
+    <div class="items">
+      <div class="item">
+        <h3>Uma leitura por mês</h3>
+        <p>Um clássico de verdade, combinado no início do mês — Homero, Epicteto, Aristóteles, Agostinho. Você lê no teu ritmo e discute no grupo. Ninguém é obrigado a terminar. Mas quem não lê não tem muito o que dizer.</p>
+      </div>
+      <div class="item">
+        <h3>Treino discutido a sério</h3>
+        <p>O que a evidência mostra, o que é lenda repetida na academia, o que serve pro teu caso. Pergunta de iniciante é bem-vinda. Achismo apresentado como fato é contestado — com a fonte na mão.</p>
+      </div>
+      <div class="item">
+        <h3>Cobrança entre pares</h3>
+        <p>Você posta o que treinou. Some uma semana e alguém pergunta onde você andou. É exatamente isso que separa um grupo de mais um feed pra você rolar no ônibus.</p>
+      </div>
+      <div class="item">
+        <h3>Sem guru</h3>
+        <p>Eu participo, não prego. A conversa é entre iguais que querem a mesma coisa. Se o que você procura é alguém pra te dizer o que fazer todo dia de manhã, o lugar errado é esse.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ FILTRO ============ -->
+<div class="wrap">
+  <section>
+    <h2>Pra quem é. E pra quem não é.</h2>
+    <div class="cols">
+      <div class="col yes">
+        <h3>Entra</h3>
+        <ul>
+          <li>Você tem entre 16 e 30 e sente que está queimando os melhores anos da tua vida no automático.</li>
+          <li>Já treina — ou começa essa semana, não ano que vem.</li>
+          <li>Sempre quis ler os clássicos e nunca teve com quem conversar sobre eles.</li>
+          <li>Aguenta ser contrariado sem levar pro lado pessoal.</li>
+        </ul>
+      </div>
+      <div class="col no">
+        <h3>Não entra</h3>
+        <ul>
+          <li>Quer planilha de treino pronta e acompanhamento individual. Isso é consultoria, e não é isso aqui.</li>
+          <li>Entra em grupo pra ficar lendo calado.</li>
+          <li>Acha que ler é tempo que podia estar treinando.</li>
+          <li>Está atrás de motivação diária. Aqui ninguém vai te empurrar.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ QUEM CONDUZ ============ -->
+<div class="wrap">
+  <section>
+    <h2>Quem conduz</h2>
+
+    <video class="video" controls playsinline preload="metadata" poster="convite-poster.jpg">
+      <source src="convite.mp4" type="video/mp4">
+      Teu navegador não toca vídeo. <a href="convite.mp4">Baixa aqui.</a>
+    </video>
+    <div class="video-cap">Dezoito segundos, na minha voz.</div>
+
+    <div class="who">
+      <div class="name">Gustavo Pamplona</div>
+      <div class="handle">@ogustavopamplona</div>
+      <!-- TROCAR: uma ou duas linhas reais de credencial (formação, tempo de treino, o que te sustenta). Não inventei isso por você. -->
+      <p>Escrevo sobre treino e sobre os clássicos com a mesma exigência: fonte na mão, nunca frase solta. Areté é o grupo que eu queria ter encontrado aos dezoito anos e não existia.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ PREÇO ============ -->
+<div class="wrap">
+  <section id="entrar">
+    <h2>Entrar</h2>
+    <div class="price-box">
+      <div class="price">R$5 <span>por mês</span></div>
+      <div class="billed">Cobrado R$59,99 uma vez por ano. Cancela quando quiser.</div>
+      <!-- TROCAR: colar aqui o link do checkout da Hotmart -->
+      <a class="btn" href="#">Entrar no Areté</a>
+      <div class="paylogos">Pagamento pela Hotmart · Pix ou cartão</div>
+    </div>
+    <p class="lead">Cinco reais é de propósito. O preço não é o filtro — se fosse, bastaria cobrar caro e encher de gente que pode pagar. O filtro é o que a gente espera de você depois que entrar.</p>
+  </section>
+</div>
+
+<!-- ============ FAQ ============ -->
+<div class="wrap">
+  <section>
+    <h2>Antes de perguntar</h2>
+
+    <details>
+      <summary>Preciso já treinar?</summary>
+      <p>Não. Precisa começar. Se você entra hoje e na semana que vem ainda não pisou na academia, o grupo não vai fazer efeito nenhum — nem ele nem nada.</p>
+    </details>
+
+    <details>
+      <summary>Preciso ter lido os clássicos?</summary>
+      <p>Não, e a maioria não leu. É exatamente pra isso que o grupo existe. A gente começa do começo, e ninguém vai te humilhar por não saber quem era Epicteto.</p>
+    </details>
+
+    <details>
+      <summary>Como eu entro depois de pagar?</summary>
+      <p>A Hotmart te envia o link do grupo assim que o pagamento é confirmado. A entrada passa por aprovação — eu confiro teu número contra a lista de compradores antes de liberar. Leva minutos, não dias.</p>
+    </details>
+
+    <details>
+      <summary>Posso sair?</summary>
+      <p>Cancela direto na Hotmart quando quiser, sem precisar me avisar nem justificar nada.</p>
+    </details>
+
+    <details>
+      <summary>Isso é consultoria de treino?</summary>
+      <p>Não. Consultoria é individual, é outro trabalho e custa outro preço. Aqui é conversa entre pares: você tira dúvida, discute, aprende junto. Ninguém vai montar tua planilha.</p>
+    </details>
+
+    <details>
+      <summary>Tem idade mínima?</summary>
+      <p>16 anos.</p>
+    </details>
+  </section>
+</div>
+
+<div class="wrap">
+  <footer>
+    <span>Areté · Gustavo Pamplona</span>
+    <span><a href="https://instagram.com/ogustavopamplona">@ogustavopamplona</a></span>
+  </footer>
+</div>
+
+</body>
+</html>
