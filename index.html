@@ -214,11 +214,20 @@ footer a:hover{color:var(--fg)}
       if (resposta === 'sim') carregarPixel();
     });
 
-    // InitiateCheckout só no botão que sai pra Hotmart — o do topo apenas rola a página.
     var checkout = document.querySelector('.js-checkout');
-    if (checkout) checkout.addEventListener('click', function(){
-      if (window.fbq) fbq('track', 'InitiateCheckout');
-    });
+    if (checkout) {
+      // Repassa a origem pro checkout da Hotmart: gustavopamplona.com/?src=meta
+      // vira pay.hotmart.com/...?src=meta, e o painel de vendas mostra o que vendeu.
+      // Sem JS o link continua funcionando, só sem a etiqueta.
+      var q = new URLSearchParams(location.search);
+      var origem = (q.get('src') || q.get('utm_source') || 'site').slice(0, 40);
+      checkout.href += (checkout.href.indexOf('?') < 0 ? '?' : '&') + 'src=' + encodeURIComponent(origem);
+
+      // InitiateCheckout só aqui — o botão do topo apenas rola a página, não é intenção de compra.
+      checkout.addEventListener('click', function(){
+        if (window.fbq) fbq('track', 'InitiateCheckout');
+      });
+    }
   });
 })();
 </script>
@@ -335,8 +344,7 @@ footer a:hover{color:var(--fg)}
     <div class="price-box">
       <div class="price">R$5 <span>por mês</span></div>
       <div class="billed">Cobrado R$59,99 uma vez por ano. Cancela quando quiser.</div>
-      <!-- TROCAR: colar aqui o link do checkout da Hotmart -->
-      <a class="btn js-checkout" href="#">Entrar no Areté</a>
+      <a class="btn js-checkout" href="https://pay.hotmart.com/X107304876S">Entrar no Areté</a>
       <div class="paylogos">Pagamento pela Hotmart · Pix ou cartão</div>
     </div>
     <p class="lead">Cinco reais é de propósito. O preço não é o filtro — se fosse, bastaria cobrar caro e encher de gente que pode pagar. O filtro é o que a gente espera de você depois que entrar.</p>
