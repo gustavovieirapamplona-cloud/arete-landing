@@ -214,20 +214,12 @@ footer a:hover{color:var(--fg)}
       if (resposta === 'sim') carregarPixel();
     });
 
+    // Contact (não InitiateCheckout): o botão abre uma conversa, não um checkout.
+    // O de cima só rola a página, então não conta como intenção de nada.
     var checkout = document.querySelector('.js-checkout');
-    if (checkout) {
-      // Repassa a origem pro checkout da Hotmart: gustavopamplona.com/?src=meta
-      // vira pay.hotmart.com/...?src=meta, e o painel de vendas mostra o que vendeu.
-      // Sem JS o link continua funcionando, só sem a etiqueta.
-      var q = new URLSearchParams(location.search);
-      var origem = (q.get('src') || q.get('utm_source') || 'site').slice(0, 40);
-      checkout.href += (checkout.href.indexOf('?') < 0 ? '?' : '&') + 'src=' + encodeURIComponent(origem);
-
-      // InitiateCheckout só aqui — o botão do topo apenas rola a página, não é intenção de compra.
-      checkout.addEventListener('click', function(){
-        if (window.fbq) fbq('track', 'InitiateCheckout');
-      });
-    }
+    if (checkout) checkout.addEventListener('click', function(){
+      if (window.fbq) fbq('track', 'Contact');
+    });
   });
 })();
 </script>
@@ -344,8 +336,8 @@ footer a:hover{color:var(--fg)}
     <div class="price-box">
       <div class="price">R$5 <span>por mês</span></div>
       <div class="billed">Cobrado R$59,99 uma vez por ano. Cancela quando quiser.</div>
-      <a class="btn js-checkout" href="https://pay.hotmart.com/X107304876S">Entrar no Areté</a>
-      <div class="paylogos">Pagamento pela Hotmart · Pix ou cartão</div>
+      <a class="btn js-checkout" href="https://wa.me/5541984045262?text=Oi%2C%20Gustavo.%20Vi%20a%20p%C3%A1gina%20do%20Aret%C3%A9%20e%20quero%20entrar%20no%20grupo.">Falar comigo no WhatsApp</a>
+      <div class="paylogos">Quem responde sou eu · pagamento por Pix ou cartão</div>
     </div>
     <p class="lead">Cinco reais é de propósito. O preço não é o filtro — se fosse, bastaria cobrar caro e encher de gente que pode pagar. O filtro é o que a gente espera de você depois que entrar.</p>
   </section>
@@ -372,13 +364,13 @@ footer a:hover{color:var(--fg)}
     </details>
 
     <details>
-      <summary>Como eu entro depois de pagar?</summary>
-      <p>A Hotmart te envia o link do grupo assim que o pagamento é confirmado. A entrada passa por aprovação — eu confiro teu número contra a lista de compradores antes de liberar. Leva minutos, não dias.</p>
+      <summary>Como eu entro?</summary>
+      <p>Pelo botão aí em cima você cai direto na minha conversa no WhatsApp. A gente troca ideia, eu te mando o pagamento, e assim que cair eu te adiciono ao grupo. Quem responde sou eu, não é robô — então pode não ser instantâneo, mas é no mesmo dia.</p>
     </details>
 
     <details>
       <summary>Posso sair?</summary>
-      <p>Cancela direto na Hotmart quando quiser, sem precisar me avisar nem justificar nada.</p>
+      <p>Quando quiser, é só sair do grupo. Sem multa, sem ter que justificar e sem eu tentar te convencer do contrário. E, como toda compra feita pela internet, você tem sete dias de direito de arrependimento pelo Código de Defesa do Consumidor — desistiu nesse prazo, devolvo o valor.</p>
     </details>
 
     <details>

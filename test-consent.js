@@ -1,4 +1,4 @@
-// Teste do consentimento (LGPD) e do link de checkout.
+// Teste do consentimento (LGPD) e do botao de contato.
 // Rodar:  NODE_PATH=<node_modules com playwright> node test-consent.js <caminho do index.html>
 const { chromium } = require('playwright');
 const assert = require('assert');
@@ -8,11 +8,11 @@ const URL = 'file:///' + process.argv[2].replace(/\\/g, '/');
 async function novaPagina(ctx, query) {
   const page = await ctx.newPage();
   // Nada de request real pra fora durante teste: um hit no pixel apareceria no
-  // Gerenciador de Eventos como visita, e um GET no checkout e barulho na Hotmart.
+  // Gerenciador de Eventos como visita, e abrir o wa.me e barulho a toa.
   await page.route('**connect.facebook.net/**', r => r.fulfill({
     status: 200, contentType: 'application/javascript', body: 'window.__fbStub = true;'
   }));
-  await page.route('**pay.hotmart.com/**', r => r.abort());
+  await page.route('**wa.me/**', r => r.abort());
   await page.goto(URL + (query || ''));
   await page.waitForLoadState('domcontentloaded');
   return page;
@@ -62,14 +62,14 @@ const naoNavegar = p => p.evaluate(() => document.addEventListener('click', e =>
   assert.equal(await bannerVisivel(page), false, 'banner nao deveria reaparecer apos aceite');
   console.log('ok  5. aceite persiste na volta');
 
-  // 6. InitiateCheckout dispara no botao do checkout, nao no do topo.
+  // 6. Contact dispara no botao do WhatsApp, nao no do topo.
   await naoNavegar(page);
   await page.evaluate(() => { window.__ev = []; window.fbq = (...a) => window.__ev.push(a); });
   await page.click('.cta-row .btn');   // topo: so rola a pagina
   await page.click('.js-checkout');    // botao real
-  assert.deepEqual(await page.evaluate(() => window.__ev), [['track', 'InitiateCheckout']],
-    'esperado exatamente 1 InitiateCheckout');
-  console.log('ok  6. InitiateCheckout so no botao da Hotmart');
+  assert.deepEqual(await page.evaluate(() => window.__ev), [['track', 'Contact']],
+    'esperado exatamente 1 Contact');
+  console.log('ok  6. Contact so no botao do WhatsApp');
   await ctx.close();
 
   // 7. Revogacao na pagina de privacidade desliga o pixel.
@@ -84,24 +84,17 @@ const naoNavegar = p => p.evaluate(() => document.addEventListener('click', e =>
   console.log('ok  7. revogacao funciona');
   await ctx.close();
 
-  // 8. O botao aponta pra Hotmart e carrega a origem.
+  // 8. O botao abre o WhatsApp certo, com a mensagem pronta.
   ctx = await browser.newContext();
   page = await novaPagina(ctx);
-  let href = await page.getAttribute('.js-checkout', 'href');
-  assert.ok(href.startsWith('https://pay.hotmart.com/X107304876S'), 'href errado: ' + href);
-  assert.ok(href.endsWith('?src=site'), 'sem origem, esperado src=site; veio: ' + href);
-  console.log('ok  8. checkout aponta pra Hotmart com src=site');
-
-  // 9. Origem do anuncio atravessa ate o checkout.
-  page = await novaPagina(ctx, '?utm_source=meta');
-  href = await page.getAttribute('.js-checkout', 'href');
-  assert.ok(href.endsWith('?src=meta'), 'utm_source deveria virar src=meta; veio: ' + href);
-  page = await novaPagina(ctx, '?src=bio-instagram');
-  href = await page.getAttribute('.js-checkout', 'href');
-  assert.ok(href.endsWith('?src=bio-instagram'), 'src deveria passar direto; veio: ' + href);
-  console.log('ok  9. origem do anuncio chega no checkout');
+  const href = await page.getAttribute('.js-checkout', 'href');
+  assert.ok(href.startsWith('https://wa.me/5541984045262'), 'numero errado: ' + href);
+  // Nada de new URL() aqui: a const URL la em cima sombreia o construtor global.
+  const texto = decodeURIComponent(href.split('text=')[1] || '');
+  assert.ok(/Areté/.test(texto), 'mensagem deveria citar o Arete; veio: ' + texto);
+  console.log('ok  8. WhatsApp 41 98404-5262 com mensagem pronta');
   await ctx.close();
 
   await browser.close();
-  console.log('\n9/9 passou.');
+  console.log('\n8/8 passou.');
 })().catch(e => { console.error('FALHOU:', e.message); process.exit(1); });
