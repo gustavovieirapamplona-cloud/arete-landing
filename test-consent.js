@@ -88,11 +88,11 @@ const naoNavegar = p => p.evaluate(() => document.addEventListener('click', e =>
   ctx = await browser.newContext();
   page = await novaPagina(ctx);
   const href = await page.getAttribute('.js-checkout', 'href');
-  assert.ok(href.startsWith('https://wa.me/5541984045262'), 'numero errado: ' + href);
+  assert.ok(href.startsWith('https://wa.me/5541997067289'), 'numero errado: ' + href);
   // Nada de new URL() aqui: a const URL la em cima sombreia o construtor global.
   const texto = decodeURIComponent(href.split('text=')[1] || '');
   assert.ok(/Areté/.test(texto), 'mensagem deveria citar o Arete; veio: ' + texto);
-  console.log('ok  8. WhatsApp 41 98404-5262 com mensagem pronta');
+  console.log('ok  8. WhatsApp 41 99706-7289 com mensagem pronta');
   await ctx.close();
 
   await browser.close();
