@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Areté — filosofia e treino</title>
-<meta name="description" content="Filosofia e treino, no mesmo lugar. Responde 6 perguntas rápidas e veja se faz sentido pra você.">
+<meta name="description" content="Filosofia e treino, no mesmo lugar. Responde 6 perguntas rápidas e vê se faz sentido pra você.">
 <meta name="robots" content="noindex">
 
 <meta property="og:type" content="website">
@@ -448,7 +448,7 @@ TELAS.abertura = function(){
   limpar(); progresso(0);
   tela.appendChild(el('h1', 'marca', 'Areté'));
   tela.appendChild(el('p', 'sub', 'Filosofia e treino, no mesmo lugar.'));
-  tela.appendChild(el('p', 'apoio', 'Responde 6 perguntas rápidas e veja se faz sentido pra você.'));
+  tela.appendChild(el('p', 'apoio', 'Responde 6 perguntas rápidas e vê se faz sentido pra você.'));
 
   var b = el('button', 'acao', 'Começar');
   b.type = 'button';
@@ -564,8 +564,8 @@ TELAS.ponte = function(){
   if (estado.perfil === PERFIS.TUDO || estado.perfil === PERFIS.ESTUDO) {
     var filo = estado.temas.indexOf('Filosofia') >= 0 || estado.temas.indexOf('Estoicismo') >= 0;
     linha = filo
-      ? 'Filosofia então é exatamente o nosso assunto'
-      : 'Tratamos sobre estes temas no grupo';
+      ? 'Então filosofia é exatamente o nosso assunto'
+      : 'Falamos sobre esses temas no grupo';
   } else if (estado.perfil === PERFIS.PAROU) {
     linha = 'Nosso grupo aborda exatamente isso';
   } else {
@@ -585,8 +585,8 @@ TELAS.degrau1 = function(){
   limpar(); progresso(3);
 
   tela.appendChild(el('h2', 'pergunta', estado.retomou5
-    ? 'Percebe como é dificil achar grupos que abordam esses assuntos?'
-    : 'Percebe a dificuldade de encontrar grupos como estes hoje em dia né?'));
+    ? 'Percebe como é difícil achar grupos que abordam esses assuntos?'
+    : 'Percebe a dificuldade de encontrar grupos como esses hoje em dia, né?'));
 
   function recusou(){
     if (estado.retomou5) { ir('gratuito'); return; }   // ja explicou uma vez: encerra
@@ -607,7 +607,7 @@ TELAS.degrau1 = function(){
 var DENTRO = [
   'Tem duas salas ativas, uma de filosofia e uma de treino, com gente trocando ideia de verdade',
   'O pessoal troca o que tá estudando e se ajuda',
-  'Atuo na área de treino e nutrição, então dúvida de treino e dieta tem com quem falar',
+  'Atuo na área de treino e nutrição, então quem tiver dúvida de treino ou dieta tem com quem falar',
   'Fomentamos projetos entre os membros',
   'E futuramente teremos aulas gravadas e ao vivo'
 ];
@@ -641,7 +641,7 @@ TELAS.degrau2 = function(){
   } else if (estado.perfil === PERFIS.PAROU) {
     texto = 'Entende como o grupo pode te ajudar a voltar ao ritmo e evoluir ainda mais rápido?';
   } else {
-    texto = 'E entende a necessidade desses grupos para a sua evolução né?';
+    texto = 'E entende a necessidade desses grupos para a sua evolução, né?';
   }
   tela.appendChild(el('h2', 'pergunta', texto));
 
@@ -674,7 +674,7 @@ TELAS.degrau3 = function(){
 /* ---- 9. aviso da taxa — nenhum numero aparece aqui ---- */
 TELAS.taxa = function(){
   limpar(); progresso(6);
-  tela.appendChild(el('h2', 'pergunta', 'Nosso grupo cobramos uma taxa para entrar, faz sentido para voce?'));
+  tela.appendChild(el('h2', 'pergunta', 'No nosso grupo cobramos uma taxa para entrar, faz sentido para você?'));
   opcoes([
     { texto: 'Faz sentido', acao: function(){ ir('precos'); } },
     { texto: 'Não',         acao: function(){ ir('gratuito'); } }
@@ -685,7 +685,7 @@ TELAS.taxa = function(){
 /* ---- 10. precos — o primeiro numero do funil ---- */
 var PLANOS = [
   { id: 'anual',      nome: 'Anual',      valor: '59,99', unidade: 'por ano',
-    extra: 'Dá 5 reais por mês, e vai junto uma planilha de treinamento' },
+    extra: 'Dá 5 reais por mês e vai junto uma planilha de treinamento' },
   { id: 'trimestral', nome: 'Trimestral', valor: '29,99', unidade: '', extra: '' }
 ];
 
@@ -717,7 +717,7 @@ TELAS.precos = function(){
   });
   tela.appendChild(caixa);
 
-  tela.appendChild(el('p', 'encaixe', 'Se encaixa no que voce busca?'));
+  tela.appendChild(el('p', 'encaixe', 'Se encaixa no que você busca?'));
 
   var r = el('div', 'rodape');
   var sair = el('button', 'linksec', 'Não se encaixa agora');
@@ -753,7 +753,7 @@ TELAS.gratuito = function(){
 
   var blocos = el('div', 'blocos');
   blocos.appendChild(el('p', 'bloco', 'Tenho um grupo de avisos que é gratuito, posto conteúdo de filosofia e treino lá'));
-  blocos.appendChild(el('p', 'bloco', 'Entra pra acompanhar sem compromisso, e se um dia fizer sentido a gente conversa'));
+  blocos.appendChild(el('p', 'bloco', 'Entra pra acompanhar sem compromisso e, se um dia fizer sentido, a gente conversa'));
   tela.appendChild(blocos);
 
   var a = document.createElement('a');

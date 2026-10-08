@@ -175,7 +175,7 @@ async function cabeNaTela(page, onde) {
     // E a retomada de verdade continua disponivel.
     await toque(page, 'Nunca procurei');
     await toque(page, 'Entendi');
-    assert.ok((await textoDaTela(page)).includes('Percebe como é dificil'),
+    assert.ok((await textoDaTela(page)).includes('Percebe como é difícil'),
       'a recusa real deveria reescrever a pergunta');
     console.log('ok  7. "como funciona?" nao consome a retomada; a recusa consome');
     await ctx.close();
@@ -216,7 +216,7 @@ async function cabeNaTela(page, onde) {
     assert.ok((await textoDaTela(b.page)).includes('E tem interesse em filosofia?'),
       'faltou a tela condicional de interesse em filosofia');
     await toque(b.page, 'Um pouco');
-    assert.ok((await textoDaTela(b.page)).includes('Tratamos sobre estes temas no grupo'), 'ponte errada');
+    assert.ok((await textoDaTela(b.page)).includes('Falamos sobre esses temas no grupo'), 'ponte errada');
     console.log('ok  9. ramificacoes da tela 3, ponte e condicional de filosofia');
     await b.ctx.close();
   }
