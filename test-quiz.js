@@ -12,8 +12,9 @@ const ENDERECO = 'file:///' + ARQUIVO.replace(/\\/g, '/');
 // com numero e nao podem reprovar o teste; "29,99" e "59,99" tem que reprovar.
 const TEM_PRECO = /\d+[.,]\d{2}|R\$|\breais\b/i;
 
-async function abrir(browser, { largura = 390, altura = 844, aceitar = true } = {}) {
-  const ctx = await browser.newContext({ viewport: { width: largura, height: altura } });
+async function abrir(browser, { largura = 390, altura = 844, aceitar = true, movimento = 'reduce' } = {}) {
+  // Movimento reduzido: sem animacao nem pausa, leitura imediata e estavel.
+  const ctx = await browser.newContext({ viewport: { width: largura, height: altura }, reducedMotion: movimento });
   const page = await ctx.newPage();
   await page.route('**connect.facebook.net/**', r => r.fulfill({
     status: 200, contentType: 'application/javascript', body: 'window.__fbStub = true;'
@@ -36,10 +37,10 @@ async function cabeNaTela(page, onde) {
       .map(e => ({ t: e.textContent.trim().slice(0, 28), b: Math.round(e.getBoundingClientRect().bottom) }))
       .filter(x => x.b > window.innerHeight);
   });
-  assert.equal(fora.length, 0, `${onde}: abaixo da dobra em 390px -> ${JSON.stringify(fora)}`);
+  assert.equal(fora.length, 0, `${onde}: botao abaixo da dobra -> ${JSON.stringify(fora)}`);
 }
 
-const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Faz sentido', 'Não'];
+const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Faz sentido', 'Não'];
 
 (async () => {
   const browser = await chromium.launch();
@@ -59,7 +60,7 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
     assert.ok(/29,99/.test(preco) && /59,99/.test(preco), 'a tela 8 deveria mostrar os dois valores');
     assert.ok(preco.indexOf('29,99') < preco.indexOf('59,99'), 'trimestral vem primeiro, e a ordem em que ele fala');
     assert.ok(!/mais popular|recomendado|desconto|oferta|promo|garantia|vagas/i.test(preco), 'selo proibido');
-    console.log('ok  1. nenhum valor nas 8 telas anteriores; tela 8 traz trimestral antes do anual');
+    console.log('ok  1. nenhum valor nas 7 telas anteriores; tela 8 traz trimestral antes do anual');
     await ctx.close();
   }
 
@@ -93,15 +94,15 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
     await toque(page, 'Não');                   // segue pro preco
     ev = await page.evaluate(() => window.__ev.map(e => e[1]));
     assert.equal(ev.filter(e => e === 'Lead').length, 1, 'Lead nao pode disparar de novo no preco');
-    assert.ok(ev.includes('ViewContent'), 'ViewContent deveria disparar no Começar');
-    console.log('ok  3. ViewContent no inicio, Lead uma vez so, ao passar a taxa');
+    assert.ok(ev.includes('ViewContent'), 'ViewContent deveria disparar na primeira resposta');
+    console.log('ok  3. ViewContent na 1a resposta, Lead uma vez so, ao passar a taxa');
     await ctx.close();
   }
 
   /* 4. A mensagem do WhatsApp le como frase de pessoa. */
   {
     const { ctx, page } = await abrir(browser);
-    for (const p of ['Começar', 'Faço ambos', 'Filosofia', 'Teologia', 'Continuar',
+    for (const p of ['Faço ambos', 'Filosofia', 'Teologia', 'Continuar',
                      'Com certeza', 'Faz sentido', 'Faz sentido', 'Não', 'Se encaixa', 'Anual']) await toque(page, p);
 
     const href = await page.getAttribute('a.acao', 'href');
@@ -120,7 +121,6 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
   /* 5. Quem nao estuda nao recebe a tela de temas, e a linha some. */
   {
     const { ctx, page } = await abrir(browser);
-    await toque(page, 'Começar');
     await toque(page, 'Só treino');
     assert.ok((await textoDaTela(page)).includes('E tem interesse em filosofia?'),
       'quem so treina deveria receber a pergunta de interesse');
@@ -135,9 +135,9 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
   /* 6. Os tres "nao" terminam no grupo gratuito, sem insistencia. */
   {
     const saidas = [
-      ['concordância', ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Não']],
-      ['taxa',         ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Não']],
-      ['preço',        ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Faz sentido', 'Não', 'Não se encaixa agora']]
+      ['concordância', ['Faço ambos', 'Filosofia', 'Continuar', 'Não']],
+      ['taxa',         ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Não']],
+      ['preço',        ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Faz sentido', 'Não', 'Não se encaixa agora']]
     ];
     for (const [nome, passos] of saidas) {
       const { ctx, page } = await abrir(browser);
@@ -157,7 +157,7 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
   /* 7. "Mais ou menos" segue em frente: a explicacao e a resposta. */
   {
     const { ctx, page } = await abrir(browser);
-    for (const p of ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Mais ou menos']) await toque(page, p);
+    for (const p of ['Faço ambos', 'Filosofia', 'Continuar', 'Mais ou menos']) await toque(page, p);
     assert.ok((await textoDaTela(page)).includes('Na nossa comunidade temos 3 chats'),
       '"Mais ou menos" deveria seguir pra explicacao, nao sair');
     console.log('ok  7. "Mais ou menos" segue pra explicacao');
@@ -167,7 +167,7 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
   /* 8. A tela de duvidas tem as cinco e volta pra taxa. */
   {
     const { ctx, page } = await abrir(browser);
-    for (const p of ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza']) await toque(page, p);
+    for (const p of ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza']) await toque(page, p);
     await toque(page, 'Tenho uma dúvida');
     const t = await textoDaTela(page);
     for (const q of ['Tem plano mensal?', 'Os debates têm horário fixo?', 'Quem está por trás?',
@@ -184,7 +184,7 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
   /* 8b. "Ficou com alguma dúvida?" -> Sim manda pro WhatsApp, sem ver preco. */
   {
     const { ctx, page } = await abrir(browser);
-    for (const p of ['Começar', 'Faço ambos', 'Filosofia', 'Continuar',
+    for (const p of ['Faço ambos', 'Filosofia', 'Continuar',
                      'Com certeza', 'Faz sentido', 'Faz sentido']) await toque(page, p);
     assert.ok((await textoDaTela(page)).includes('Ficou com alguma dúvida?'),
       'a tela de duvida deveria vir logo depois da taxa');
@@ -202,6 +202,35 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
     await ctx.close();
   }
 
+  /* 8c. Abre direto na pergunta, com a marca no topo e sem botao de voltar. */
+  {
+    const { ctx, page } = await abrir(browser);
+    const t = await textoDaTela(page);
+    assert.ok(t.includes('Você treina? Estuda?'), 'o quiz deveria abrir na primeira pergunta');
+    assert.ok(t.includes('Responde 4 perguntas rápidas'), 'a promessa de 4 perguntas deveria continuar visivel');
+    assert.equal(await page.locator('#marcaTopo').isVisible(), true, 'a marca deveria aparecer na abertura');
+    assert.equal(await page.locator('#voltar').isVisible(), false, 'nao ha pra onde voltar na primeira tela');
+
+    await toque(page, 'Faço ambos');
+    assert.equal(await page.locator('#voltar').isVisible(), true, 'o voltar deveria aparecer a partir da 2a tela');
+    assert.equal(await page.locator('#marcaTopo').isVisible(), false, 'marca e voltar dividem o mesmo canto');
+    console.log('ok 8c. abre na pergunta; marca e voltar se revezam no topo');
+    await ctx.close();
+  }
+
+  /* 8d. Com animacao ligada: a resposta acende, e um toque duplo nao pula tela. */
+  {
+    const { ctx, page } = await abrir(browser, { movimento: 'no-preference' });
+    const botao = page.getByRole('button', { name: 'Faço ambos', exact: true });
+    await botao.dblclick();
+    assert.ok((await textoDaTela(page)).includes('Você treina? Estuda?'), 'a troca deveria esperar a pausa');
+    await page.waitForFunction(() => document.querySelector('#tela').innerText.includes('Estuda quais temas?'));
+    await page.waitForTimeout(400);
+    assert.ok((await textoDaTela(page)).includes('Estuda quais temas?'), 'toque duplo nao pode pular a tela seguinte');
+    console.log('ok 8d. com animacao: pausa antes de trocar, toque duplo nao pula tela');
+    await ctx.close();
+  }
+
   /* 9. Pixel so depois do consentimento. */
   {
     const { ctx, page } = await abrir(browser, { aceitar: false });
@@ -215,13 +244,11 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
     await ctx.close();
   }
 
-  /* 10. Dobra de 390px: nenhuma tela do caminho principal pode rolar. */
+  /* 10. Em tres tamanhos de celular, todo botao de resposta fica alcancavel
+        sem rolar. E o criterio do documento; altura de pagina nao e — a
+        explicacao rola em tela pequena, com a acao grudada no rodape. */
   {
-    const { ctx, page } = await abrir(browser);
-    // Par explicito tela->acao: clicar num chip NAO troca de tela, entao
-    // listas paralelas saem do lugar e reportam a tela errada.
     const passos = [
-      ['abertura',     'Começar'],
       ['perfil',       'Faço ambos'],
       ['temas',        'Filosofia'],     // chip: continua na mesma tela
       ['temas',        'Continuar'],
@@ -231,21 +258,26 @@ const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com c
       ['ficou dúvida', 'Não'],
       ['preço',        'Se encaixa']
     ];
-    const alturas = {};
+    for (const [largura, altura] of [[390, 844], [375, 667], [360, 640]]) {
+      const { ctx, page } = await abrir(browser, { largura, altura });
+      for (const [nome, acao] of passos) {
+        await cabeNaTela(page, `${nome} em ${largura}x${altura}`);
+        await toque(page, acao);
+      }
+      await cabeNaTela(page, `qual plano em ${largura}x${altura}`);
+      await ctx.close();
+    }
+    // No aparelho de referencia, nada rola.
+    const { ctx, page } = await abrir(browser);
     for (const [nome, acao] of passos) {
-      alturas[nome] = await page.evaluate(() => document.documentElement.scrollHeight);
-      await cabeNaTela(page, nome);
+      const h = await page.evaluate(() => document.documentElement.scrollHeight);
+      assert.ok(h <= 844, `${nome} rola em 390x844: ${h}px`);
       await toque(page, acao);
     }
-    alturas['qual plano'] = await page.evaluate(() => document.documentElement.scrollHeight);
-    await cabeNaTela(page, 'qual plano');
-
-    const rolam = Object.entries(alturas).filter(([, h]) => h > 844).map(([n, h]) => `${n} ${h}px`);
-    assert.equal(rolam.length, 0, 'tela rolando em 390x844: ' + rolam.join(', '));
-    console.log('ok 10. nenhuma das 10 telas rola em 390x844');
     await ctx.close();
+    console.log('ok 10. botoes alcancaveis em 390x844, 375x667 e 360x640; nada rola em 390x844');
   }
 
   await browser.close();
-  console.log('\n11/11 passou.');
+  console.log('\n13/13 passou.');
 })().catch(e => { console.error('FALHOU:', e.message); process.exit(1); });

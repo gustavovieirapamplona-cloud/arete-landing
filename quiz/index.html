@@ -6,6 +6,7 @@
 <title>Areté — filosofia e treino</title>
 <meta name="description" content="Filosofia e treino, no mesmo lugar. Responde 4 perguntas rápidas e veja se faz sentido pra você.">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E0E0E">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Areté — filosofia e treino">
@@ -39,7 +40,18 @@ body{
   font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
   font-size:16px;line-height:1.5;
   -webkit-font-smoothing:antialiased;
+  min-height:100vh;          /* iOS antigo nao conhece dvh */
   min-height:100dvh;
+  overscroll-behavior-y:none;               /* sem bounce mostrando o vazio */
+  -webkit-tap-highlight-color:transparent;  /* o realce cinza do iOS some */
+}
+
+/* Toque: sem atraso de 300ms, sem zoom no toque duplo, sem selecionar o
+   texto ao segurar o botao. */
+button, a.acao:active{transform:scale(.99)}
+.acao{
+  touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
 }
 
 /* ---------- estrutura ---------- */
@@ -47,7 +59,7 @@ body{
   min-height:100dvh;
   display:flex;flex-direction:column;
   max-width:460px;margin:0 auto;
-  padding:0 20px calc(22px + env(safe-area-inset-bottom));
+  padding:env(safe-area-inset-top) 20px calc(22px + env(safe-area-inset-bottom));
 }
 body.com-aviso .app{padding-bottom:calc(132px + env(safe-area-inset-bottom))}
 @media(min-width:560px){ body.com-aviso .app{padding-bottom:calc(96px + env(safe-area-inset-bottom))} }
@@ -55,12 +67,20 @@ body.com-aviso .app{padding-bottom:calc(132px + env(safe-area-inset-bottom))}
 .topo{padding:13px 0 0;display:flex;align-items:center;gap:14px;min-height:50px}
 .voltar{
   background:none;border:0;cursor:pointer;padding:8px;margin-left:-8px;
+  min-height:44px;display:inline-flex;align-items:center;   /* alvo de toque */
   color:var(--muted);font:inherit;font-size:.9rem;line-height:1;
   border-radius:6px;flex:none;
 }
 .voltar[hidden]{display:none}
+/* A marca ocupa o lugar do "voltar" na primeira tela, pra quem chegou do
+   anuncio saber onde caiu. */
+.marca-topo{
+  font-family:'Playfair Display',Georgia,serif;font-weight:700;
+  font-size:1.08rem;color:var(--sol);flex:none;
+}
+.marca-topo[hidden]{display:none}
 .barra{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
-.barra i{display:block;height:100%;width:0;background:var(--sol);border-radius:2px;transition:width .18s ease}
+.barra i{display:block;height:100%;width:0;background:var(--sol);border-radius:2px;transition:width .3s cubic-bezier(.2,.7,.2,1)}
 .barra[hidden]{display:none}
 
 .tela{
@@ -69,12 +89,25 @@ body.com-aviso .app{padding-bottom:calc(132px + env(safe-area-inset-bottom))}
 }
 @keyframes entra{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 
+/* Itens entram em cascata: cada um 35ms depois do anterior, 220ms cada. */
+@keyframes sobe{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+:is(.opcoes,.chips,.chats,.blocos,.planos)>*{animation:sobe .22s cubic-bezier(.2,.7,.2,1) both}
+:is(.opcoes,.chips,.chats,.blocos,.planos)>:nth-child(2){animation-delay:.035s}
+:is(.opcoes,.chips,.chats,.blocos,.planos)>:nth-child(3){animation-delay:.07s}
+:is(.opcoes,.chips,.chats,.blocos,.planos)>:nth-child(4){animation-delay:.105s}
+:is(.opcoes,.chips,.chats,.blocos,.planos)>:nth-child(5){animation-delay:.14s}
+:is(.opcoes,.chips,.chats,.blocos,.planos)>:nth-child(6){animation-delay:.175s}
+:is(.opcoes,.chips,.chats,.blocos,.planos)>:nth-child(n+7){animation-delay:.21s}
+.acoes{animation:sobe .22s cubic-bezier(.2,.7,.2,1) .12s both}
+.marca-topo{animation:entra .3s ease both}
+
 /* ---------- texto ---------- */
 .marca{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:2.9rem;line-height:1.05;margin-bottom:12px}
 .sub{font-size:1.12rem;margin-bottom:10px}
 .apoio{font-size:.97rem;color:var(--muted);margin-bottom:28px;max-width:30em}
 .pergunta{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:1.58rem;line-height:1.22;margin-bottom:22px}
-.entrada{font-size:.93rem;color:var(--muted);margin-bottom:7px}
+.entrada{font-size:.93rem;color:var(--muted);margin-bottom:5px}
+.dica{font-size:.92rem;color:var(--muted);margin:-10px 0 20px;max-width:30em}
 .titulo{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:1.42rem;line-height:1.2;margin-bottom:14px}
 
 /* ---------- respostas ---------- */
@@ -86,7 +119,10 @@ body.com-aviso .app{padding-bottom:calc(132px + env(safe-area-inset-bottom))}
   border:1px solid var(--line);border-radius:10px;
   transition:border-color .15s ease,background .15s ease;
 }
-.opcao:active{background:var(--cardOn)}
+.opcao:active{background:var(--cardOn);transform:scale(.985)}
+.opcao.escolhida{border-color:var(--sol);background:var(--cardOn)}
+.opcao{transition:border-color .15s ease,background .15s ease,transform .1s ease}
+.chip:active{transform:scale(.96)}
 
 .acao{
   font:inherit;font-weight:700;cursor:pointer;
@@ -105,6 +141,7 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
   border:1px solid var(--line);border-radius:999px;
   transition:border-color .15s ease,background .15s ease;
 }
+.chip{transition:border-color .15s ease,background .15s ease,transform .1s ease}
 .chip[aria-pressed="true"]{border-color:var(--sol);background:var(--cardOn);font-weight:600}
 .outros-campo{
   font:inherit;width:100%;min-height:52px;padding:14px 16px;margin-bottom:16px;
@@ -114,14 +151,14 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
 .outros-campo::placeholder{color:var(--muted)}
 
 /* ---------- blocos de explicacao ---------- */
-.chats{display:flex;flex-direction:column;gap:8px;margin-bottom:13px}
+.chats{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .chat{
   background:var(--card);border:1px solid var(--line);border-radius:10px;
   padding:11px 14px;font-size:.92rem;line-height:1.38;color:var(--muted);
 }
 .chat b{display:block;color:var(--fg);font-weight:700;font-size:.99rem;margin-bottom:3px}
 
-.blocos{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.blocos{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
 .bloco{position:relative;padding-left:16px;font-size:.9rem;line-height:1.38;color:var(--muted)}
 .bloco::before{content:"";position:absolute;left:0;top:.56em;width:6px;height:6px;border-radius:50%;background:var(--sol)}
 .bloco a{color:var(--fg)}
@@ -150,7 +187,15 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
 .encaixe{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:1.28rem;margin-bottom:16px}
 
 /* ---------- rodapes discretos ---------- */
-.rodape{margin-top:16px;text-align:center}
+/* Em telas que nao cabem (explicacao em celular pequeno), o texto rola mas a
+   acao fica colada no rodape: o botao de resposta nunca sai do alcance.
+   Em tela que cabe, sticky nao faz nada — o elemento nem chega a sair. */
+.acoes{
+  position:sticky;bottom:0;
+  padding:10px 0 calc(4px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top, var(--bg) 78%, transparent);
+}
+.rodape{margin-top:14px;text-align:center}
 .linksec{
   background:none;border:0;cursor:pointer;padding:12px;
   font:inherit;font-size:.9rem;color:var(--muted);
@@ -206,6 +251,7 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
 <div class="app" id="app" hidden>
   <div class="topo">
     <button class="voltar" id="voltar" type="button" aria-label="Voltar para a tela anterior" hidden>← Voltar</button>
+    <div class="marca-topo" id="marcaTopo">Areté</div>
     <div class="barra" id="barra" hidden><i id="barraFill"></i></div>
   </div>
   <main class="tela" id="tela" aria-live="polite"></main>
@@ -308,13 +354,21 @@ var tela    = document.getElementById('tela');
 var barra   = document.getElementById('barra');
 var fill    = document.getElementById('barraFill');
 var btVolta = document.getElementById('voltar');
+var marcaTopo = document.getElementById('marcaTopo');
 
 function ir(id, semHistorico){
   if (atual && !semHistorico) pilha.push({ id: atual, estado: JSON.parse(JSON.stringify(estado)) });
   atual = id;
   TELAS[id]();
-  btVolta.hidden = pilha.length === 0;
+  atualizarTopo();
   window.scrollTo(0, 0);
+}
+
+// Voltar e marca dividem o mesmo canto: um aparece quando o outro some.
+function atualizarTopo(){
+  var inicio = pilha.length === 0;
+  btVolta.hidden = inicio;
+  marcaTopo.hidden = !inicio;
 }
 
 btVolta.addEventListener('click', function(){
@@ -323,7 +377,7 @@ btVolta.addEventListener('click', function(){
   estado = anterior.estado;
   atual = anterior.id;
   TELAS[atual]();
-  btVolta.hidden = pilha.length === 0;
+  atualizarTopo();
   window.scrollTo(0, 0);
 });
 
@@ -333,7 +387,21 @@ function progresso(passo){
   fill.style.width = Math.round(passo / TOTAL_PERGUNTAS * 100) + '%';
 }
 
-function limpar(){ while (tela.firstChild) tela.removeChild(tela.firstChild); }
+// Pausa com a resposta acesa antes de trocar de tela. Zero pra quem pediu
+// movimento reduzido.
+var PAUSA = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 0 : 150;
+var travado = false;
+
+var caixaAcoes = null;
+function limpar(){
+  while (tela.firstChild) tela.removeChild(tela.firstChild);
+  caixaAcoes = null;
+}
+// Botao principal e link secundario moram na mesma caixa grudada no rodape.
+function areaAcoes(){
+  if (!caixaAcoes) { caixaAcoes = el('div', 'acoes'); tela.appendChild(caixaAcoes); }
+  return caixaAcoes;
+}
 
 function el(tag, classe, texto){
   var n = document.createElement(tag);
@@ -355,7 +423,13 @@ function opcoes(lista){
     var b = el('button', 'opcao', item.texto);
     b.type = 'button';
     b.setAttribute('aria-label', item.texto);
-    b.addEventListener('click', item.acao);
+    b.addEventListener('click', function(){
+      if (travado) return;                       // segundo toque durante a pausa
+      if (!PAUSA) { item.acao(); return; }       // movimento reduzido: direto
+      travado = true;
+      b.classList.add('escolhida');              // a resposta acende...
+      setTimeout(function(){ travado = false; item.acao(); }, PAUSA);   // ...e so entao troca
+    });
     caixa.appendChild(b);
   });
   tela.appendChild(caixa);
@@ -365,7 +439,7 @@ function botaoAcao(texto, aoTocar){
   var b = el('button', 'acao', texto);
   b.type = 'button';
   b.addEventListener('click', aoTocar);
-  tela.appendChild(b);
+  areaAcoes().appendChild(b);
 }
 
 function linkDiscreto(texto, aoTocar){
@@ -374,7 +448,7 @@ function linkDiscreto(texto, aoTocar){
   b.type = 'button';
   b.addEventListener('click', aoTocar);
   r.appendChild(b);
-  tela.appendChild(r);
+  areaAcoes().appendChild(r);
 }
 
 /* ============================================================
@@ -424,23 +498,19 @@ function mensagem(){
 
 var TELAS = {};
 
-/* ---- 1. abertura ---- */
-TELAS.abertura = function(){
-  limpar(); progresso(0);
-  tela.appendChild(el('h1', 'marca', 'Areté'));
-  tela.appendChild(el('p', 'sub', 'Filosofia e treino, no mesmo lugar.'));
-  tela.appendChild(el('p', 'apoio', 'Responde 4 perguntas rápidas e veja se faz sentido pra você.'));
-  botaoAcao('Começar', function(){ evento('ViewContent'); ir('perfil'); });
-};
+/* ---- 1. qualificacao — o quiz abre direto aqui ---- */
+var jaEngajou = false;
 
-/* ---- 2. qualificacao ---- */
 TELAS.perfil = function(){
   limpar(); progresso(1);
   tela.appendChild(el('h2', 'pergunta', 'Você treina? Estuda?'));
+  tela.appendChild(el('p', 'dica', 'Responde 4 perguntas rápidas e veja se faz sentido pra você.'));
 
   var ordem = [PERFIS.AMBOS, PERFIS.TREINO, PERFIS.ESTUDO, PERFIS.VOLTAR, PERFIS.NADA];
   opcoes(ordem.map(function(p){
     return { texto: p, acao: function(){
+      // Sem tela de abertura, "engajou" passa a ser a primeira resposta.
+      if (!jaEngajou) { jaEngajou = true; evento('ViewContent'); }
       estado.perfil = p;
       estado.temas = [];
       estado.temasOutros = '';
@@ -733,7 +803,7 @@ aviso.addEventListener('click', function(e){
 });
 
 app.hidden = false;
-ir('abertura', true);
+ir('perfil', true);
 
 })();
 </script>
