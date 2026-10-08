@@ -120,9 +120,9 @@ const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Fa
       document.addEventListener('click', e => { if (e.target.closest('a')) e.preventDefault(); });
     });
     await cartao.click();
-    assert.deepEqual(await page.evaluate(() => window.__ev), [['track', 'Contact', { plano: 'anual' }]],
-      'o cartao deveria disparar Contact com o plano');
-    console.log('ok  4. cartao abre o WhatsApp com "Escolhi o plano anual." e dispara Contact');
+    assert.deepEqual(await page.evaluate(() => window.__ev), [['track', 'InitiateCheckout', { plano: 'anual' }]],
+      'o cartao deveria disparar InitiateCheckout com o plano');
+    console.log('ok  4. cartao abre o WhatsApp com "Escolhi o plano anual." e dispara InitiateCheckout');
     await ctx.close();
   }
 

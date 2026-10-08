@@ -681,7 +681,9 @@ TELAS.preco = function(){
     a.appendChild(el('div', 'nome', pl.nome));
     a.appendChild(el('div', 'valor', pl.valor));
     if (pl.extra) a.appendChild(el('div', 'extra', pl.extra));
-    a.addEventListener('click', function(){ evento('Contact', { plano: pl.id }); });
+    // Evento so do clique em plano. Contact fica pras duvidas, entao no
+    // Facebook da pra otimizar por este sem regra de parametro.
+    a.addEventListener('click', function(){ evento('InitiateCheckout', { plano: pl.id }); });
     caixa.appendChild(a);
   });
   tela.appendChild(caixa);
