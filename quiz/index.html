@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Areté — filosofia e treino</title>
+<meta name="description" content="Filosofia e treino, no mesmo lugar. Responde 6 perguntas rápidas e veja se faz sentido pra você.">
+<meta name="robots" content="noindex">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Areté — filosofia e treino">
+<meta property="og:description" content="Filosofia e treino, no mesmo lugar.">
+<meta property="og:locale" content="pt_BR">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230E0E0E'/%3E%3Ctext x='50' y='72' font-size='68' font-family='Georgia,serif' fill='%23FFB627' text-anchor='middle'%3E%CE%91%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0E0E0E;
+  --fg:#FAFAF7;
+  --sol:#FFB627;
+  --muted:#9A9A94;
+  --line:rgba(250,250,247,.15);
+  --card:rgba(250,250,247,.04);
+  --cardOn:rgba(255,182,39,.10);
+  --sombra:rgba(0,0,0,.4);
+}
+/* Sem variante clara de proposito: a landing e escura sempre, e o mesmo
+   anuncio nao pode levar a duas marcas diferentes. */
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--fg);
+  font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+
+/* ---------- estrutura ---------- */
+.app{
+  min-height:100dvh;
+  display:flex;flex-direction:column;
+  max-width:460px;margin:0 auto;
+  padding:0 20px calc(24px + env(safe-area-inset-bottom));
+}
+body.com-aviso .app{padding-bottom:calc(132px + env(safe-area-inset-bottom))}
+@media(min-width:560px){ body.com-aviso .app{padding-bottom:calc(96px + env(safe-area-inset-bottom))} }
+
+.topo{
+  padding:14px 0 0;
+  display:flex;align-items:center;gap:14px;min-height:52px;
+}
+.voltar{
+  background:none;border:0;cursor:pointer;padding:8px;margin-left:-8px;
+  color:var(--muted);font:inherit;font-size:.9rem;line-height:1;
+  border-radius:6px;flex:none;
+}
+
+.voltar[hidden]{display:none}
+.barra{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.barra i{
+  display:block;height:100%;width:0;background:var(--sol);
+  border-radius:2px;transition:width .18s ease;
+}
+.barra[hidden]{display:none}
+
+.tela{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:20px 0;
+  animation:entra .17s ease;
+}
+@keyframes entra{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* ---------- tipos de texto ---------- */
+.marca{
+  font-family:'Playfair Display',Georgia,serif;font-weight:700;
+  font-size:2.9rem;line-height:1.05;margin-bottom:12px;
+}
+.sub{font-size:1.12rem;color:var(--fg);margin-bottom:10px}
+.apoio{font-size:.97rem;color:var(--muted);margin-bottom:30px;max-width:30em}
+.pergunta{
+  font-family:'Playfair Display',Georgia,serif;font-weight:700;
+  font-size:1.62rem;line-height:1.22;margin-bottom:24px;
+}
+.ponte{
+  font-family:'Playfair Display',Georgia,serif;font-weight:700;
+  font-size:1.8rem;line-height:1.24;margin-bottom:32px;
+}
+
+/* ---------- respostas ---------- */
+.opcoes{display:flex;flex-direction:column;gap:10px}
+.opcao{
+  font:inherit;text-align:left;cursor:pointer;
+  min-height:56px;padding:15px 18px;
+  background:var(--card);color:var(--fg);
+  border:1px solid var(--line);border-radius:10px;
+  transition:border-color .15s ease,background .15s ease;
+}
+.opcao:active{background:var(--cardOn)}
+
+.acao{
+  font:inherit;font-weight:700;cursor:pointer;
+  min-height:56px;padding:16px 28px;width:100%;
+  background:var(--sol);color:var(--bg);
+  border:0;border-radius:10px;
+  transition:filter .15s ease;
+}
+
+a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
+
+/* ---------- chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+.chip{
+  font:inherit;font-size:.95rem;cursor:pointer;
+  min-height:48px;padding:12px 18px;
+  background:var(--card);color:var(--fg);
+  border:1px solid var(--line);border-radius:999px;
+  transition:border-color .15s ease,background .15s ease;
+}
+.chip[aria-pressed="true"]{border-color:var(--sol);background:var(--cardOn);font-weight:600}
+.outros-campo{
+  font:inherit;width:100%;min-height:52px;padding:14px 16px;margin-bottom:18px;
+  background:var(--card);color:var(--fg);
+  border:1px solid var(--line);border-radius:10px;
+}
+.outros-campo::placeholder{color:var(--muted)}
+
+/* ---------- info (o que tem dentro) ---------- */
+.blocos{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.bloco{
+  position:relative;padding-left:18px;
+  font-size:1rem;line-height:1.45;color:var(--fg);
+}
+.bloco::before{
+  content:"";position:absolute;left:0;top:.6em;
+  width:6px;height:6px;border-radius:50%;background:var(--sol);
+}
+
+/* ---------- precos ---------- */
+.planos{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.plano{
+  font:inherit;text-align:left;cursor:pointer;width:100%;
+  padding:20px;background:var(--card);color:var(--fg);
+  border:1px solid var(--line);border-radius:12px;
+  transition:border-color .15s ease,background .15s ease;
+}
+
+.plano .nome{
+  font-size:.74rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.plano .valor{
+  font-family:'Playfair Display',Georgia,serif;font-weight:700;
+  font-size:1.95rem;line-height:1;
+}
+.plano .valor em{
+  font-style:normal;font-family:'Archivo',sans-serif;
+  font-size:.92rem;font-weight:500;color:var(--muted);
+}
+.plano .extra{margin-top:9px;font-size:.9rem;color:var(--muted);line-height:1.4}
+.encaixe{
+  font-family:'Playfair Display',Georgia,serif;font-weight:700;
+  font-size:1.3rem;text-align:center;margin-bottom:18px;
+}
+
+/* ---------- rodapes discretos ---------- */
+.rodape{margin-top:24px;text-align:center}
+.linksec{
+  background:none;border:0;cursor:pointer;padding:12px;
+  font:inherit;font-size:.9rem;color:var(--muted);
+  text-decoration:underline;text-underline-offset:3px;
+}
+
+.nota{margin-top:16px;font-size:.88rem;color:var(--muted);text-align:center}
+
+/* ---------- aviso de cookies ---------- */
+.aviso{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:var(--bg);border-top:1px solid var(--line);
+  box-shadow:0 -8px 24px var(--sombra);
+  padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;
+}
+.aviso[hidden]{display:none}
+.aviso p{font-size:.85rem;color:var(--muted);margin:0;max-width:40em;text-align:center}
+.aviso a{color:var(--fg)}
+.aviso-btns{display:flex;gap:9px}
+.abtn{
+  font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;
+  min-height:44px;padding:11px 22px;border-radius:8px;
+  background:var(--sol);color:var(--bg);border:1px solid var(--sol);
+}
+.abtn.fantasma{background:transparent;color:var(--muted);border-color:var(--line)}
+
+
+/* Hover so onde existe ponteiro de verdade. */
+@media (hover: hover){
+  .opcao:hover{border-color:var(--sol)}
+  .plano:hover{border-color:var(--sol);background:var(--cardOn)}
+  .acao:hover{filter:brightness(1.08)}
+  .chip:hover{border-color:var(--sol)}
+  .voltar:hover,.linksec:hover,.abtn.fantasma:hover{color:var(--fg)}
+}
+
+/* ---------- foco visivel e movimento reduzido ---------- */
+:focus-visible{outline:3px solid var(--sol);outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+.semjs{padding:40px 20px;max-width:460px;margin:0 auto;text-align:center}
+.semjs a{color:var(--sol)}
+</style>
+</head>
+<body>
+
+<noscript>
+  <div class="semjs">
+    <p class="sub">Areté — filosofia e treino, no mesmo lugar.</p>
+    <p class="apoio">Este quiz precisa de JavaScript. Pode falar comigo direto:</p>
+    <p><a href="https://wa.me/5541997067289">Chamar no WhatsApp</a></p>
+  </div>
+</noscript>
+
+<div class="app" id="app" hidden>
+  <div class="topo">
+    <button class="voltar" id="voltar" type="button" aria-label="Voltar para a pergunta anterior" hidden>← Voltar</button>
+    <div class="barra" id="barra" hidden><i id="barraFill"></i></div>
+  </div>
+  <main class="tela" id="tela" aria-live="polite"></main>
+</div>
+
+<div class="aviso" id="aviso" hidden>
+  <p>Uso cookies pra saber quem chegou aqui pelos anúncios. Você escolhe. <a href="../privacidade.html">O que é coletado.</a></p>
+  <div class="aviso-btns">
+    <button type="button" class="abtn fantasma" data-cookie="nao">Recusar</button>
+    <button type="button" class="abtn" data-cookie="sim">Aceitar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   Constantes
+   ============================================================ */
+
+// Pixel do Gustavo, o mesmo da landing (business pamplonaperformance).
+var META_PIXEL_ID = '1383933286459138';
+
+// 55 (Brasil) + 41 (DDD) + 997067289. O documento de especificacao trazia
+// 554197067289, sem o 9 inicial do celular — numero inexistente.
+var WHATSAPP = '5541997067289';
+var GRUPO_GRATUITO = 'https://chat.whatsapp.com/Kp4EV2RbgmN5jc2QwLT0BG';
+
+var CHAVE_COOKIE = 'arete-cookies';   // mesma chave da landing: a escolha vale pro site todo
+var CHAVE_UTM = 'arete-utm';
+
+var TOTAL_PERGUNTAS = 6;
+
+/* ============================================================
+   Pixel — so carrega depois do consentimento (LGPD art. 7 I)
+   ============================================================ */
+
+function carregarPixel(){
+  if (window.fbq) return;
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+  (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', META_PIXEL_ID);
+  fbq('track', 'PageView');
+}
+
+function evento(nome, params){
+  if (window.fbq) fbq('track', nome, params || undefined);
+}
+function eventoCustom(nome){
+  if (window.fbq) fbq('trackCustom', nome);
+}
+
+function lerCookie(){ try { return localStorage.getItem(CHAVE_COOKIE); } catch(e){ return null; } }
+function gravarCookie(v){ try { localStorage.setItem(CHAVE_COOKIE, v); } catch(e){} }
+
+/* ============================================================
+   utm_* e fbclid — guardados, nunca enviados na mensagem
+   ============================================================ */
+
+(function guardarOrigem(){
+  try {
+    var q = new URLSearchParams(location.search), achou = {}, tem = false;
+    q.forEach(function(valor, chave){
+      if (chave.indexOf('utm_') === 0 || chave === 'fbclid') { achou[chave] = valor; tem = true; }
+    });
+    if (tem) sessionStorage.setItem(CHAVE_UTM, JSON.stringify(achou));
+  } catch(e){}
+})();
+
+/* ============================================================
+   Estado
+   ============================================================ */
+
+var estado = {
+  perfil: null,        // resposta da tela 2
+  temas: [],           // chips marcados
+  temasOutros: '',     // texto livre do chip "Outros"
+  plano: null,         // 'anual' | 'trimestral'
+  retomou5: false,     // ja repetiu o degrau 1?
+  retomou7: false      // ja repetiu o degrau 2?
+};
+
+var pilha = [];        // historico: {id, estado}
+var atual = null;
+
+var PERFIS = {
+  TUDO:   'Treino e estudo',
+  TREINO: 'Só treino',
+  ESTUDO: 'Só estudo',
+  PAROU:  'Treinava e estudava, mas parei',
+  NADA:   'Nenhum dos dois ainda'
+};
+
+/* ============================================================
+   Render
+   ============================================================ */
+
+var app    = document.getElementById('app');
+var tela   = document.getElementById('tela');
+var barra  = document.getElementById('barra');
+var fill   = document.getElementById('barraFill');
+var btVolta= document.getElementById('voltar');
+
+function ir(id, semHistorico){
+  if (atual && !semHistorico) pilha.push({ id: atual, estado: JSON.parse(JSON.stringify(estado)) });
+  atual = id;
+  TELAS[id]();
+  btVolta.hidden = pilha.length === 0;
+  tela.scrollIntoView ? window.scrollTo(0, 0) : null;
+}
+
+btVolta.addEventListener('click', function(){
+  var anterior = pilha.pop();
+  if (!anterior) return;
+  estado = anterior.estado;
+  atual = anterior.id;
+  TELAS[atual]();
+  btVolta.hidden = pilha.length === 0;
+  window.scrollTo(0, 0);
+});
+
+function progresso(passo){
+  if (!passo) { barra.hidden = true; return; }
+  barra.hidden = false;
+  fill.style.width = Math.round(passo / TOTAL_PERGUNTAS * 100) + '%';
+}
+
+function limpar(){ while (tela.firstChild) tela.removeChild(tela.firstChild); }
+
+function el(tag, classe, texto){
+  var n = document.createElement(tag);
+  if (classe) n.className = classe;
+  if (texto != null) n.textContent = texto;
+  return n;
+}
+
+// Lista de respostas de escolha unica.
+function opcoes(lista){
+  var caixa = el('div', 'opcoes');
+  lista.forEach(function(item){
+    var b = el('button', 'opcao', item.texto);
+    b.type = 'button';
+    b.setAttribute('aria-label', item.texto);
+    b.addEventListener('click', item.acao);
+    caixa.appendChild(b);
+  });
+  tela.appendChild(caixa);
+}
+
+// Para onde o "Entendi" da tela de info volta. Precisa ser explicito: ler o
+// historico nao distingue quem recusou um degrau de quem so clicou no link,
+// e confundir os dois gastaria a retomada de quem nunca disse nao.
+var infoDestino = null;
+
+// Link "como funciona?" no rodape das telas de pergunta.
+function rodapeComoFunciona(){
+  var r = el('div', 'rodape');
+  var b = el('button', 'linksec', 'como funciona?');
+  b.type = 'button';
+  b.addEventListener('click', function(){ infoDestino = atual; ir('info'); });
+  r.appendChild(b);
+  tela.appendChild(r);
+}
+
+/* ============================================================
+   Mensagem do WhatsApp
+   ============================================================ */
+
+var PERFIL_PRIMEIRA_PESSOA = {};
+PERFIL_PRIMEIRA_PESSOA[PERFIS.TUDO]   = 'Treino e estudo';
+PERFIL_PRIMEIRA_PESSOA[PERFIS.TREINO] = 'Só treino';
+PERFIL_PRIMEIRA_PESSOA[PERFIS.ESTUDO] = 'Só estudo';
+PERFIL_PRIMEIRA_PESSOA[PERFIS.PAROU]  = 'Treinava e estudava, mas parei';
+PERFIL_PRIMEIRA_PESSOA[PERFIS.NADA]   = 'Não faço nenhum dos dois ainda';
+
+function fraseTemas(){
+  var nomes = estado.temas
+    .filter(function(t){ return t !== 'Outros'; })
+    .map(function(t){ return t.toLowerCase(); });
+
+  var livre = estado.temasOutros.trim();
+  if (livre) nomes.push(livre.toLowerCase());
+  if (!nomes.length) return '';
+
+  var lista = nomes.length === 1
+    ? nomes[0]
+    : nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
+
+  return 'Estudo ' + lista + '.';
+}
+
+function mensagem(){
+  // A primeira linha e fixa, palavra por palavra: e por ela que o CRM
+  // reconhece quem veio do quiz.
+  var linhas = ['Olá! Fiz o quiz do site.'];
+  if (estado.perfil) linhas.push(PERFIL_PRIMEIRA_PESSOA[estado.perfil]);
+  var t = fraseTemas();
+  if (t) linhas.push(t);
+  linhas.push('O ' + estado.plano + ' se encaixa pra mim.');
+  return linhas.join('\n');
+}
+
+/* ============================================================
+   Telas
+   ============================================================ */
+
+var TELAS = {};
+
+/* ---- 1. abertura ---- */
+TELAS.abertura = function(){
+  limpar(); progresso(0);
+  tela.appendChild(el('h1', 'marca', 'Areté'));
+  tela.appendChild(el('p', 'sub', 'Filosofia e treino, no mesmo lugar.'));
+  tela.appendChild(el('p', 'apoio', 'Responde 6 perguntas rápidas e veja se faz sentido pra você.'));
+
+  var b = el('button', 'acao', 'Começar');
+  b.type = 'button';
+  b.addEventListener('click', function(){
+    evento('ViewContent');
+    ir('perfil');
+  });
+  tela.appendChild(b);
+};
+
+/* ---- 2. qualificacao ---- */
+TELAS.perfil = function(){
+  limpar(); progresso(1);
+  tela.appendChild(el('h2', 'pergunta', 'Você treina? Estuda?'));
+
+  var ordem = [PERFIS.TUDO, PERFIS.TREINO, PERFIS.ESTUDO, PERFIS.PAROU, PERFIS.NADA];
+  opcoes(ordem.map(function(p){
+    return { texto: p, acao: function(){
+      estado.perfil = p;
+      estado.temas = [];
+      estado.temasOutros = '';
+      ir('especifica');
+    }};
+  }));
+  rodapeComoFunciona();
+};
+
+/* ---- 3. pergunta especifica (ramifica pelo perfil) ---- */
+var PERGUNTA_ESPECIFICA = {};
+PERGUNTA_ESPECIFICA[PERFIS.TUDO]   = 'Estuda quais temas?';
+PERGUNTA_ESPECIFICA[PERFIS.ESTUDO] = 'Boa! Estuda quais temas?';
+PERGUNTA_ESPECIFICA[PERFIS.TREINO] = 'E tem interesse em filosofia?';
+PERGUNTA_ESPECIFICA[PERFIS.PAROU]  = 'E percebe a necessidade de voltar?';
+PERGUNTA_ESPECIFICA[PERFIS.NADA]   = 'E pretende começar ambos?';
+
+var TEMAS = ['Filosofia', 'Estoicismo', 'Concurso público', 'Faculdade', 'Leitura', 'Outros'];
+
+TELAS.especifica = function(){
+  limpar(); progresso(2);
+  tela.appendChild(el('h2', 'pergunta', PERGUNTA_ESPECIFICA[estado.perfil]));
+
+  var usaChips = estado.perfil === PERFIS.TUDO || estado.perfil === PERFIS.ESTUDO;
+
+  if (usaChips) {
+    var caixa = el('div', 'chips');
+    var campo = el('input', 'outros-campo');
+    campo.type = 'text';
+    campo.placeholder = 'Quais? (opcional)';
+    campo.setAttribute('aria-label', 'Outros temas que você estuda');
+    campo.hidden = true;
+    campo.value = estado.temasOutros;
+
+    TEMAS.forEach(function(nome){
+      var c = el('button', 'chip', nome);
+      c.type = 'button';
+      c.setAttribute('aria-pressed', estado.temas.indexOf(nome) >= 0 ? 'true' : 'false');
+      c.addEventListener('click', function(){
+        var i = estado.temas.indexOf(nome);
+        if (i >= 0) estado.temas.splice(i, 1); else estado.temas.push(nome);
+        c.setAttribute('aria-pressed', i >= 0 ? 'false' : 'true');
+        if (nome === 'Outros') {
+          campo.hidden = estado.temas.indexOf('Outros') < 0;
+          if (!campo.hidden) campo.focus();
+          if (campo.hidden) { campo.value = ''; estado.temasOutros = ''; }
+        }
+      });
+      caixa.appendChild(c);
+    });
+
+    campo.hidden = estado.temas.indexOf('Outros') < 0;
+    campo.addEventListener('input', function(){ estado.temasOutros = campo.value; });
+
+    tela.appendChild(caixa);
+    tela.appendChild(campo);
+
+    var seguir = el('button', 'acao', 'Continuar');
+    seguir.type = 'button';
+    seguir.addEventListener('click', function(){
+      // Marcou tema mas nenhum de filosofia: pergunta o interesse antes da ponte.
+      var filo = estado.temas.indexOf('Filosofia') >= 0 || estado.temas.indexOf('Estoicismo') >= 0;
+      ir(filo ? 'ponte' : 'interesseFilosofia');
+    });
+    tela.appendChild(seguir);
+
+  } else {
+    opcoes([
+      { texto: 'Sim',           acao: function(){ ir('ponte'); } },
+      { texto: 'Não',           acao: function(){ ir('ponte'); } },
+      { texto: 'Mais ou menos', acao: function(){ ir('ponte'); } }
+    ]);
+  }
+
+  rodapeComoFunciona();
+};
+
+/* ---- 3b. condicional: estuda, mas nao filosofia ---- */
+TELAS.interesseFilosofia = function(){
+  limpar(); progresso(2);
+  tela.appendChild(el('h2', 'pergunta', 'E tem interesse em filosofia?'));
+  opcoes([
+    { texto: 'Sim',      acao: function(){ ir('ponte'); } },
+    { texto: 'Não',      acao: function(){ ir('ponte'); } },
+    { texto: 'Um pouco', acao: function(){ ir('ponte'); } }
+  ]);
+  rodapeComoFunciona();
+};
+
+/* ---- 4. ponte ---- */
+TELAS.ponte = function(){
+  limpar(); progresso(2);
+
+  var linha;
+  if (estado.perfil === PERFIS.TUDO || estado.perfil === PERFIS.ESTUDO) {
+    var filo = estado.temas.indexOf('Filosofia') >= 0 || estado.temas.indexOf('Estoicismo') >= 0;
+    linha = filo
+      ? 'Filosofia então é exatamente o nosso assunto'
+      : 'Tratamos sobre estes temas no grupo';
+  } else if (estado.perfil === PERFIS.PAROU) {
+    linha = 'Nosso grupo aborda exatamente isso';
+  } else {
+    linha = 'O grupo une filosofia e treino, os dois puxando junto';
+  }
+
+  tela.appendChild(el('p', 'ponte', linha));
+
+  var b = el('button', 'acao', 'Continuar');
+  b.type = 'button';
+  b.addEventListener('click', function(){ ir('degrau1'); });
+  tela.appendChild(b);
+};
+
+/* ---- 5. primeiro degrau ---- */
+TELAS.degrau1 = function(){
+  limpar(); progresso(3);
+
+  tela.appendChild(el('h2', 'pergunta', estado.retomou5
+    ? 'Percebe como é dificil achar grupos que abordam esses assuntos?'
+    : 'Percebe a dificuldade de encontrar grupos como estes hoje em dia né?'));
+
+  function recusou(){
+    if (estado.retomou5) { ir('gratuito'); return; }   // ja explicou uma vez: encerra
+    estado.retomou5 = true;
+    infoDestino = 'degrau1';
+    ir('info');
+  }
+
+  opcoes([
+    { texto: 'Sim, é difícil',  acao: function(){ ir('degrau2'); } },
+    { texto: 'Nunca procurei',  acao: recusou },
+    { texto: 'Não, acho fácil', acao: recusou }
+  ]);
+  rodapeComoFunciona();
+};
+
+/* ---- 6. o que tem dentro ---- */
+var DENTRO = [
+  'Tem duas salas ativas, uma de filosofia e uma de treino, com gente trocando ideia de verdade',
+  'O pessoal troca o que tá estudando e se ajuda',
+  'Atuo na área de treino e nutrição, então dúvida de treino e dieta tem com quem falar',
+  'Fomentamos projetos entre os membros',
+  'E futuramente teremos aulas gravadas e ao vivo'
+];
+
+TELAS.info = function(){
+  limpar(); progresso(0);
+
+  var blocos = el('div', 'blocos');
+  DENTRO.forEach(function(linha){ blocos.appendChild(el('p', 'bloco', linha)); });
+  tela.appendChild(blocos);
+
+  var b = el('button', 'acao', 'Entendi');
+  b.type = 'button';
+  b.addEventListener('click', function(){
+    var destino = infoDestino || 'abertura';
+    infoDestino = null;
+    pilha.pop();              // descarta a entrada que levou ate aqui
+    ir(destino, true);        // o info nao entra no historico
+    btVolta.hidden = pilha.length === 0;
+  });
+  tela.appendChild(b);
+};
+
+/* ---- 7. segundo degrau ---- */
+TELAS.degrau2 = function(){
+  limpar(); progresso(4);
+
+  var texto;
+  if (estado.retomou7) {
+    texto = 'E entende a necessidade de um grupo assim pra nossa evolução?';
+  } else if (estado.perfil === PERFIS.PAROU) {
+    texto = 'Entende como o grupo pode te ajudar a voltar ao ritmo e evoluir ainda mais rápido?';
+  } else {
+    texto = 'E entende a necessidade desses grupos para a sua evolução né?';
+  }
+  tela.appendChild(el('h2', 'pergunta', texto));
+
+  function recusou(){
+    if (estado.retomou7) { ir('gratuito'); return; }
+    estado.retomou7 = true;
+    infoDestino = 'degrau2';
+    ir('info');
+  }
+
+  opcoes([
+    { texto: 'Sim, entendo',  acao: function(){ ir('degrau3'); } },
+    { texto: 'Mais ou menos', acao: recusou },
+    { texto: 'Não',           acao: recusou }
+  ]);
+  rodapeComoFunciona();
+};
+
+/* ---- 8. terceiro degrau ---- */
+TELAS.degrau3 = function(){
+  limpar(); progresso(5);
+  tela.appendChild(el('h2', 'pergunta', 'E quer participar de um grupo como esse?'));
+  opcoes([
+    { texto: 'Quero', acao: function(){ ir('taxa'); } },
+    { texto: 'Não',   acao: function(){ ir('gratuito'); } }   // sem segunda tentativa
+  ]);
+  rodapeComoFunciona();
+};
+
+/* ---- 9. aviso da taxa — nenhum numero aparece aqui ---- */
+TELAS.taxa = function(){
+  limpar(); progresso(6);
+  tela.appendChild(el('h2', 'pergunta', 'Nosso grupo cobramos uma taxa para entrar, faz sentido para voce?'));
+  opcoes([
+    { texto: 'Faz sentido', acao: function(){ ir('precos'); } },
+    { texto: 'Não',         acao: function(){ ir('gratuito'); } }
+  ]);
+  rodapeComoFunciona();
+};
+
+/* ---- 10. precos — o primeiro numero do funil ---- */
+var PLANOS = [
+  { id: 'anual',      nome: 'Anual',      valor: '59,99', unidade: 'por ano',
+    extra: 'Dá 5 reais por mês, e vai junto uma planilha de treinamento' },
+  { id: 'trimestral', nome: 'Trimestral', valor: '29,99', unidade: '', extra: '' }
+];
+
+TELAS.precos = function(){
+  limpar(); progresso(6);
+
+  // A pessoa subiu a escada inteira: e este o evento pra otimizar o anuncio.
+  evento('Lead');
+
+  var caixa = el('div', 'planos');
+  PLANOS.forEach(function(p){
+    var b = el('button', 'plano');
+    b.type = 'button';
+    b.setAttribute('aria-label', p.nome + ', ' + p.valor + ' ' + p.unidade);
+
+    b.appendChild(el('div', 'nome', p.nome));
+
+    var valor = el('div', 'valor', p.valor + ' ');
+    if (p.unidade) valor.appendChild(el('em', null, p.unidade));
+    b.appendChild(valor);
+
+    if (p.extra) b.appendChild(el('div', 'extra', p.extra));
+
+    b.addEventListener('click', function(){
+      estado.plano = p.id;
+      ir('whatsapp');
+    });
+    caixa.appendChild(b);
+  });
+  tela.appendChild(caixa);
+
+  tela.appendChild(el('p', 'encaixe', 'Se encaixa no que voce busca?'));
+
+  var r = el('div', 'rodape');
+  var sair = el('button', 'linksec', 'Não se encaixa agora');
+  sair.type = 'button';
+  sair.addEventListener('click', function(){ ir('gratuito'); });
+  r.appendChild(sair);
+  tela.appendChild(r);
+};
+
+/* ---- final A ---- */
+TELAS.whatsapp = function(){
+  limpar(); progresso(6);
+
+  tela.appendChild(el('h2', 'ponte', 'Show'));
+  tela.appendChild(el('p', 'apoio', 'Me chama no WhatsApp que eu te explico o resto e libero seu acesso.'));
+
+  var a = document.createElement('a');
+  a.className = 'acao';
+  a.textContent = 'Falar no WhatsApp';
+  a.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensagem());
+  a.rel = 'noopener';
+  a.addEventListener('click', function(){ evento('Contact', { plano: estado.plano }); });
+  tela.appendChild(a);
+
+  tela.appendChild(el('p', 'nota', 'Respondo em alguns minutos.'));
+};
+
+/* ---- final B — saida de todo "nao", sem tentar reverter ---- */
+TELAS.gratuito = function(){
+  limpar(); progresso(0);
+
+  tela.appendChild(el('h2', 'ponte', 'Tranquilo, sem problema nenhum'));
+
+  var blocos = el('div', 'blocos');
+  blocos.appendChild(el('p', 'bloco', 'Tenho um grupo de avisos que é gratuito, posto conteúdo de filosofia e treino lá'));
+  blocos.appendChild(el('p', 'bloco', 'Entra pra acompanhar sem compromisso, e se um dia fizer sentido a gente conversa'));
+  tela.appendChild(blocos);
+
+  var a = document.createElement('a');
+  a.className = 'acao';
+  a.textContent = 'Entrar no grupo gratuito';
+  a.href = GRUPO_GRATUITO;
+  a.rel = 'noopener';
+  a.addEventListener('click', function(){ eventoCustom('GrupoGratuito'); });
+  tela.appendChild(a);
+};
+
+/* ============================================================
+   Consentimento + inicio
+   ============================================================ */
+
+var aviso = document.getElementById('aviso');
+var escolha = lerCookie();
+if (escolha === 'sim') carregarPixel();
+
+if (!escolha) {
+  aviso.hidden = false;
+  document.body.classList.add('com-aviso');
+}
+
+aviso.addEventListener('click', function(e){
+  var resposta = e.target.getAttribute && e.target.getAttribute('data-cookie');
+  if (!resposta) return;
+  gravarCookie(resposta);
+  aviso.hidden = true;
+  document.body.classList.remove('com-aviso');
+  if (resposta === 'sim') carregarPixel();
+});
+
+app.hidden = false;
+ir('abertura', true);
+
+})();
+</script>
+</body>
+</html>
