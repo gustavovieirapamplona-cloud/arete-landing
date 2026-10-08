@@ -48,11 +48,11 @@ body{
 
 /* Toque: sem atraso de 300ms, sem zoom no toque duplo, sem selecionar o
    texto ao segurar o botao. */
-button, a.acao:active{transform:scale(.99)}
-.acao{
+button, a.acao, a.plano{
   touch-action:manipulation;
   -webkit-user-select:none;user-select:none;
 }
+.acao:active{transform:scale(.99)}
 
 /* ---------- estrutura ---------- */
 .app{
@@ -179,12 +179,18 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
 
 /* ---------- precos ---------- */
 .planos{display:flex;flex-direction:column;gap:11px;margin-bottom:14px}
-.plano{padding:18px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.plano{
+  display:block;position:relative;text-decoration:none;color:var(--fg);cursor:pointer;
+  padding:18px 44px 18px 18px;background:var(--card);border:1px solid var(--line);border-radius:12px;
+  transition:border-color .15s ease,background .15s ease,transform .1s ease;
+}
+/* A seta diz que o cartao e tocavel; os dois tem a mesma, nenhum e destacado. */
+.plano::after{content:"\203A";position:absolute;right:18px;top:14px;color:var(--sol);font-size:1.6rem;line-height:1}
+.plano:active{background:var(--cardOn);border-color:var(--sol);transform:scale(.985)}
 .plano .nome{font-size:.73rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .plano .valor{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:1.85rem;line-height:1}
 .plano .extra{margin-top:9px;font-size:.88rem;color:var(--muted);line-height:1.4}
 .parcela{font-size:.9rem;color:var(--muted);margin-bottom:18px}
-.encaixe{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:1.28rem;margin-bottom:16px}
 
 /* ---------- rodapes discretos ---------- */
 /* Em telas que nao cabem (explicacao em celular pequeno), o texto rola mas a
@@ -224,7 +230,7 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
 
 /* Hover so onde existe ponteiro: no toque ele gruda e o item parece escolhido. */
 @media (hover: hover){
-  .opcao:hover,.chip:hover{border-color:var(--sol)}
+  .opcao:hover,.chip:hover,.plano:hover{border-color:var(--sol)}
   .acao:hover{filter:brightness(1.08)}
   .voltar:hover,.linksec:hover,.abtn.fantasma:hover{color:var(--fg)}
 }
@@ -333,7 +339,7 @@ function gravarCookie(v){ try { localStorage.setItem(CHAVE_COOKIE, v); } catch(e
    Estado
    ============================================================ */
 
-var estado = { perfil: null, temas: [], temasOutros: '', plano: null };
+var estado = { perfil: null, temas: [], temasOutros: '' };
 var pilha = [];
 var atual = null;
 
@@ -478,18 +484,19 @@ function fraseTemas(){
   return 'Estudo ' + lista + '.';
 }
 
-function mensagem(){
+function mensagem(plano){
   // Primeira linha fixa, palavra por palavra: e por ela que o CRM
   // reconhece quem veio do quiz.
   var linhas = ['Olá! Fiz o quiz do site.'];
   if (estado.perfil) linhas.push(PRIMEIRA_PESSOA[estado.perfil]);
   var t = fraseTemas();
   if (t) linhas.push(t);
-  // Quem veio pela duvida nao escolheu plano: a ultima linha muda.
-  linhas.push(estado.plano
-    ? 'O ' + estado.plano + ' se encaixa pra mim.'
-    : 'Fiquei com uma dúvida.');
+  linhas.push(plano ? 'Escolhi o plano ' + plano + '.' : 'Fiquei com uma dúvida.');
   return linhas.join('\n');
+}
+
+function linkWhatsApp(plano){
+  return 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensagem(plano));
 }
 
 /* ============================================================
@@ -695,66 +702,56 @@ TELAS.duvidaFinal = function(){
 
   tela.appendChild(el('h2', 'pergunta', 'Ficou com alguma dúvida?'));
   opcoes([
-    { texto: 'Sim', acao: function(){ estado.plano = null; ir('whatsapp'); } },
+    { texto: 'Sim', acao: function(){ ir('whatsapp'); } },
     { texto: 'Não', acao: function(){ ir('preco'); } }
   ]);
 };
 
-/* ---- 8. preco — o primeiro numero do funil ---- */
+/* ---- 8. preco e escolha — o primeiro numero do funil ----
+   Cada cartao e um link direto pro WhatsApp com o plano ja na mensagem. */
+var PLANOS = [
+  { id: 'trimestral', nome: 'Trimestral', valor: '29,99', extra: '' },
+  { id: 'anual',      nome: 'Anual',      valor: '59,99',
+    extra: 'No anual voce recebe também um curso sobre métodos de aprendizado para te ajudar nos estudos. E também uma planilha de treinos para te ajudar no físico' }
+];
+
 TELAS.preco = function(){
   limpar(); progresso(4);
 
+  tela.appendChild(el('h2', 'pergunta', 'Qual dos dois fica melhor para você?'));
+
   var caixa = el('div', 'planos');
-
-  var tri = el('div', 'plano');
-  tri.appendChild(el('div', 'nome', 'Trimestral'));
-  tri.appendChild(el('div', 'valor', '29,99'));
-  caixa.appendChild(tri);
-
-  var anu = el('div', 'plano');
-  anu.appendChild(el('div', 'nome', 'Anual'));
-  anu.appendChild(el('div', 'valor', '59,99'));
-  anu.appendChild(el('div', 'extra',
-    'No anual voce recebe também um curso sobre métodos de aprendizado para te ajudar nos estudos. E também uma planilha de treinos para te ajudar no físico'));
-  caixa.appendChild(anu);
-
+  PLANOS.forEach(function(pl){
+    var a = document.createElement('a');
+    a.className = 'plano';
+    a.href = linkWhatsApp(pl.id);
+    a.rel = 'noopener';
+    a.setAttribute('aria-label', 'Escolher o plano ' + pl.id + ', ' + pl.valor);
+    a.appendChild(el('div', 'nome', pl.nome));
+    a.appendChild(el('div', 'valor', pl.valor));
+    if (pl.extra) a.appendChild(el('div', 'extra', pl.extra));
+    a.addEventListener('click', function(){ evento('Contact', { plano: pl.id }); });
+    caixa.appendChild(a);
+  });
   tela.appendChild(caixa);
-  tela.appendChild(el('p', 'parcela', 'Parcelamos no cartão ou pix'));
-  tela.appendChild(el('p', 'encaixe', 'Se encaixa para voce?'));
 
-  botaoAcao('Se encaixa', function(){ ir('plano'); });
+  tela.appendChild(el('p', 'parcela', 'Parcelamos no cartão ou pix'));
   linkDiscreto('Não se encaixa agora', function(){ ir('gratuito'); });
 };
 
-/* ---- 9. qual plano ---- */
-TELAS.plano = function(){
-  limpar(); progresso(4);
-  tela.appendChild(el('h2', 'pergunta', 'Qual plano fica melhor para voce?'));
-  opcoes([
-    { texto: 'Trimestral', acao: function(){ estado.plano = 'trimestral'; ir('whatsapp'); } },
-    { texto: 'Anual',      acao: function(){ estado.plano = 'anual';      ir('whatsapp'); } }
-  ]);
-};
-
-/* ---- final A ---- */
+/* ---- final A — so pra quem ficou com duvida ---- */
 TELAS.whatsapp = function(){
   limpar(); progresso(4);
 
-  var comDuvida = !estado.plano;
-
-  tela.appendChild(el('h2', 'titulo', comDuvida ? 'Pode perguntar' : 'Top'));
-  tela.appendChild(el('p', 'apoio', comDuvida
-    ? 'Me chama no WhatsApp que eu te respondo.'
-    : 'Me chama no WhatsApp que eu te passo o pix e já libero seu acesso.'));
+  tela.appendChild(el('h2', 'titulo', 'Pode perguntar'));
+  tela.appendChild(el('p', 'apoio', 'Me chama no WhatsApp que eu te respondo.'));
 
   var a = document.createElement('a');
   a.className = 'acao';
   a.textContent = 'Falar no WhatsApp';
-  a.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensagem());
+  a.href = linkWhatsApp(null);
   a.rel = 'noopener';
-  a.addEventListener('click', function(){
-    evento('Contact', comDuvida ? { origem: 'duvida' } : { plano: estado.plano });
-  });
+  a.addEventListener('click', function(){ evento('Contact', { origem: 'duvida' }); });
   tela.appendChild(a);
 
   tela.appendChild(el('p', 'nota', 'Respondo em alguns minutos.'));

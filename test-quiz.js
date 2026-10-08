@@ -103,18 +103,28 @@ const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Fa
   {
     const { ctx, page } = await abrir(browser);
     for (const p of ['Faço ambos', 'Filosofia', 'Teologia', 'Continuar',
-                     'Com certeza', 'Faz sentido', 'Faz sentido', 'Não', 'Se encaixa', 'Anual']) await toque(page, p);
+                     'Com certeza', 'Faz sentido', 'Faz sentido', 'Não']) await toque(page, p);
 
-    const href = await page.getAttribute('a.acao', 'href');
+    assert.ok((await textoDaTela(page)).includes('Qual dos dois fica melhor para você?'), 'pergunta errada na tela de preco');
+    const cartao = page.locator('a.plano', { hasText: 'Anual' });
+    const href = await cartao.getAttribute('href');
     assert.ok(href.startsWith('https://wa.me/5541997067289?text='), 'numero errado: ' + href);
 
     const msg = decodeURIComponent(href.split('text=')[1]);
     assert.ok(msg.startsWith('Olá! Fiz o quiz do site.'), 'primeira linha fixa quebrou: ' + msg);
     assert.equal(msg,
-      'Olá! Fiz o quiz do site.\nFaço ambos\nEstudo filosofia e teologia.\nO anual se encaixa pra mim.',
+      'Olá! Fiz o quiz do site.\nFaço ambos\nEstudo filosofia e teologia.\nEscolhi o plano anual.',
       'mensagem fora do formato:\n' + msg);
     assert.ok(!/[•*]|Dados do quiz|utm_|fbclid/i.test(msg), 'nada de marcador nem rastreio');
-    console.log('ok  4. mensagem comeca com a linha fixa e le como pessoa');
+    // O toque no cartao avisa o pixel com o plano escolhido.
+    await page.evaluate(() => {
+      window.__ev = []; window.fbq = (...a) => window.__ev.push(a);
+      document.addEventListener('click', e => { if (e.target.closest('a')) e.preventDefault(); });
+    });
+    await cartao.click();
+    assert.deepEqual(await page.evaluate(() => window.__ev), [['track', 'Contact', { plano: 'anual' }]],
+      'o cartao deveria disparar Contact com o plano');
+    console.log('ok  4. cartao abre o WhatsApp com "Escolhi o plano anual." e dispara Contact');
     await ctx.close();
   }
 
@@ -124,9 +134,9 @@ const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Fa
     await toque(page, 'Só treino');
     assert.ok((await textoDaTela(page)).includes('E tem interesse em filosofia?'),
       'quem so treina deveria receber a pergunta de interesse');
-    for (const p of ['Um pouco', 'Entendo', 'Faz sentido', 'Faz sentido', 'Não', 'Se encaixa', 'Trimestral']) await toque(page, p);
-    const msg = decodeURIComponent((await page.getAttribute('a.acao', 'href')).split('text=')[1]);
-    assert.equal(msg, 'Olá! Fiz o quiz do site.\nSó treino\nO trimestral se encaixa pra mim.',
+    for (const p of ['Um pouco', 'Entendo', 'Faz sentido', 'Faz sentido', 'Não']) await toque(page, p);
+    const msg = decodeURIComponent((await page.locator('a.plano', { hasText: 'Trimestral' }).getAttribute('href')).split('text=')[1]);
+    assert.equal(msg, 'Olá! Fiz o quiz do site.\nSó treino\nEscolhi o plano trimestral.',
       'sem tema a linha deveria sumir:\n' + msg);
     console.log('ok  5. ramificacao de quem nao estuda, e a linha de temas omitida');
     await ctx.close();
@@ -255,8 +265,7 @@ const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Fa
       ['concordância', 'Com certeza'],
       ['como funciona','Faz sentido'],
       ['taxa',         'Faz sentido'],
-      ['ficou dúvida', 'Não'],
-      ['preço',        'Se encaixa']
+      ['ficou dúvida', 'Não']
     ];
     for (const [largura, altura] of [[390, 844], [375, 667], [360, 640]]) {
       const { ctx, page } = await abrir(browser, { largura, altura });
@@ -264,7 +273,7 @@ const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Fa
         await cabeNaTela(page, `${nome} em ${largura}x${altura}`);
         await toque(page, acao);
       }
-      await cabeNaTela(page, `qual plano em ${largura}x${altura}`);
+      await cabeNaTela(page, `preço em ${largura}x${altura}`);
       await ctx.close();
     }
     // No aparelho de referencia, nada rola.
