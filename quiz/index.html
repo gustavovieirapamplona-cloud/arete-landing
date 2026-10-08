@@ -411,7 +411,10 @@ function mensagem(){
   if (estado.perfil) linhas.push(PRIMEIRA_PESSOA[estado.perfil]);
   var t = fraseTemas();
   if (t) linhas.push(t);
-  linhas.push('O ' + estado.plano + ' se encaixa pra mim.');
+  // Quem veio pela duvida nao escolheu plano: a ultima linha muda.
+  linhas.push(estado.plano
+    ? 'O ' + estado.plano + ' se encaixa pra mim.'
+    : 'Fiquei com uma dúvida.');
   return linhas.join('\n');
 }
 
@@ -607,17 +610,29 @@ TELAS.taxa = function(){
   tela.appendChild(el('p', 'entrada', 'Nos temos uma mensalidade'));
   tela.appendChild(el('h2', 'pergunta', 'Faz sentido para voce?'));
   opcoes([
-    { texto: 'Faz sentido', acao: function(){ ir('preco'); } },
+    { texto: 'Faz sentido', acao: function(){ ir('duvidaFinal'); } },
     { texto: 'Não',         acao: function(){ ir('gratuito'); } }
+  ]);
+};
+
+/* ---- 7b. ficou com alguma duvida? ---- */
+TELAS.duvidaFinal = function(){
+  limpar(); progresso(4);
+
+  // Lead vive aqui, nao na tela de preco: quem chega aqui ja concordou duas
+  // vezes, e quem sai com duvida vai falar com ele — e lead igual.
+  evento('Lead');
+
+  tela.appendChild(el('h2', 'pergunta', 'Ficou com alguma dúvida?'));
+  opcoes([
+    { texto: 'Sim', acao: function(){ estado.plano = null; ir('whatsapp'); } },
+    { texto: 'Não', acao: function(){ ir('preco'); } }
   ]);
 };
 
 /* ---- 8. preco — o primeiro numero do funil ---- */
 TELAS.preco = function(){
   limpar(); progresso(4);
-
-  // A pessoa concordou duas vezes: e este o evento pra otimizar o anuncio.
-  evento('Lead');
 
   var caixa = el('div', 'planos');
 
@@ -655,15 +670,21 @@ TELAS.plano = function(){
 TELAS.whatsapp = function(){
   limpar(); progresso(4);
 
-  tela.appendChild(el('h2', 'titulo', 'Top'));
-  tela.appendChild(el('p', 'apoio', 'Me chama no WhatsApp que eu te passo o pix e já libero seu acesso.'));
+  var comDuvida = !estado.plano;
+
+  tela.appendChild(el('h2', 'titulo', comDuvida ? 'Pode perguntar' : 'Top'));
+  tela.appendChild(el('p', 'apoio', comDuvida
+    ? 'Me chama no WhatsApp que eu te respondo.'
+    : 'Me chama no WhatsApp que eu te passo o pix e já libero seu acesso.'));
 
   var a = document.createElement('a');
   a.className = 'acao';
   a.textContent = 'Falar no WhatsApp';
   a.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensagem());
   a.rel = 'noopener';
-  a.addEventListener('click', function(){ evento('Contact', { plano: estado.plano }); });
+  a.addEventListener('click', function(){
+    evento('Contact', comDuvida ? { origem: 'duvida' } : { plano: estado.plano });
+  });
   tela.appendChild(a);
 
   tela.appendChild(el('p', 'nota', 'Respondo em alguns minutos.'));
