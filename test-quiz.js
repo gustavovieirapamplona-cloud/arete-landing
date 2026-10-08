@@ -1,16 +1,19 @@
-// Teste do quiz. Cobre os quatro criterios de aceite do documento, mais o
-// consentimento do pixel e a armadilha do link "como funciona?".
+// Teste do quiz. Cobre os cinco criterios de aceite do documento, mais o
+// consentimento do pixel e as ramificacoes.
 // Rodar:  NODE_PATH=<node_modules com playwright> node test-quiz.js <caminho do quiz/index.html>
 const { chromium } = require('playwright');
 const assert = require('assert');
+const fs = require('fs');
 
-const ENDERECO = 'file:///' + process.argv[2].replace(/\\/g, '/');
+const ARQUIVO = process.argv[2];
+const ENDERECO = 'file:///' + ARQUIVO.replace(/\\/g, '/');
 
-// Qualquer coisa com cara de dinheiro. "6 perguntas" nao casa; "59,99" casa.
-const TEM_PRECO = /\d+[.,]\d{2}|R\$|rea(l|is)\b/i;
+// So dinheiro. "3 chats", "28 dias" e "sabado as 20" sao copy obrigatoria
+// com numero e nao podem reprovar o teste; "29,99" e "59,99" tem que reprovar.
+const TEM_PRECO = /\d+[.,]\d{2}|R\$|\breais\b/i;
 
-async function abrir(browser, { largura = 390, aceitar = true } = {}) {
-  const ctx = await browser.newContext({ viewport: { width: largura, height: 844 } });
+async function abrir(browser, { largura = 390, altura = 844, aceitar = true } = {}) {
+  const ctx = await browser.newContext({ viewport: { width: largura, height: altura } });
   const page = await ctx.newPage();
   await page.route('**connect.facebook.net/**', r => r.fulfill({
     status: 200, contentType: 'application/javascript', body: 'window.__fbStub = true;'
@@ -25,81 +28,78 @@ async function abrir(browser, { largura = 390, aceitar = true } = {}) {
 const toque = (page, texto) => page.getByRole('button', { name: texto, exact: true }).click();
 const textoDaTela = page => page.locator('#tela').innerText();
 
-// Nenhum botao pode ficar abaixo da dobra: o documento exige zero rolagem.
+// Nenhum botao de resposta pode ficar abaixo da dobra.
 async function cabeNaTela(page, onde) {
-  const estouro = await page.evaluate(() => {
+  const fora = await page.evaluate(() => {
     const alvos = [...document.querySelectorAll('#tela button, #tela a, #tela input')];
-    const fundo = window.innerHeight;
     return alvos
-      .map(e => ({ t: e.textContent.trim().slice(0, 30), b: Math.round(e.getBoundingClientRect().bottom) }))
-      .filter(x => x.b > fundo);
+      .map(e => ({ t: e.textContent.trim().slice(0, 28), b: Math.round(e.getBoundingClientRect().bottom) }))
+      .filter(x => x.b > window.innerHeight);
   });
-  assert.equal(estouro.length, 0,
-    `${onde}: elemento abaixo da dobra em 390px -> ${JSON.stringify(estouro)}`);
+  assert.equal(fora.length, 0, `${onde}: abaixo da dobra em 390px -> ${JSON.stringify(fora)}`);
 }
+
+const ATE_O_PRECO = ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Faz sentido'];
 
 (async () => {
   const browser = await chromium.launch();
 
-  /* 1. Caminho do "sim" inteiro sem ver numero antes da tela de preco. */
+  /* 1. Nenhum valor antes da tela 8. */
   {
     const { ctx, page } = await abrir(browser);
-    const visto = [];
-
-    await cabeNaTela(page, 'abertura');
-    visto.push(await textoDaTela(page));
-    await toque(page, 'Começar');
-
-    for (const passo of [
-      'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar',
-      'Sim, é difícil', 'Sim, entendo', 'Quero'
-    ]) {
-      visto.push(await textoDaTela(page));
-      await cabeNaTela(page, `antes de "${passo}"`);
+    const vistos = [];
+    for (const passo of ATE_O_PRECO) {
+      vistos.push([passo, await textoDaTela(page)]);
       await toque(page, passo);
     }
+    const vazou = vistos.filter(([, t]) => TEM_PRECO.test(t)).map(([p]) => p);
+    assert.equal(vazou.length, 0, 'valor apareceu antes da tela 8, antes de: ' + vazou.join(', '));
 
-    // Tela 9: fala em taxa, mas nao pode trazer valor nenhum.
-    const telaTaxa = await textoDaTela(page);
-    visto.push(telaTaxa);
-    assert.ok(/taxa/i.test(telaTaxa), 'tela 9 deveria falar da taxa');
-    await cabeNaTela(page, 'tela da taxa');
-
-    const vazou = visto.filter(t => TEM_PRECO.test(t));
-    assert.equal(vazou.length, 0, 'preco apareceu antes da hora: ' + JSON.stringify(vazou));
-    console.log('ok  1. nenhum numero antes da tela 10 (8 telas conferidas)');
-
-    await toque(page, 'Faz sentido');
-    const precos = await textoDaTela(page);
-    assert.ok(/59,99/.test(precos) && /29,99/.test(precos), 'tela 10 deveria mostrar os valores');
-    assert.ok(precos.indexOf('59,99') < precos.indexOf('29,99'), 'o anual tem que vir primeiro (ancora)');
-    assert.ok(!/mais popular|recomendado|desconto|oferta|promo/i.test(precos), 'selo proibido na tela de preco');
-    console.log('ok  2. tela 10 mostra anual antes do trimestral, sem selo');
+    const preco = await textoDaTela(page);
+    assert.ok(/29,99/.test(preco) && /59,99/.test(preco), 'a tela 8 deveria mostrar os dois valores');
+    assert.ok(preco.indexOf('29,99') < preco.indexOf('59,99'), 'trimestral vem primeiro, e a ordem em que ele fala');
+    assert.ok(!/mais popular|recomendado|desconto|oferta|promo|garantia|vagas/i.test(preco), 'selo proibido');
+    console.log('ok  1. nenhum valor nas 7 telas anteriores; tela 8 traz trimestral antes do anual');
     await ctx.close();
   }
 
-  /* 2. Lead dispara exatamente ao chegar no preco, nao antes. */
+  /* 2. "mensal" so onde pode. */
+  {
+    const fonte = fs.readFileSync(ARQUIVO, 'utf8');
+    const permitidos = [
+      'Tem plano mensal?',            // a pergunta da duvida
+      'Mensal nao fazemos',           // a resposta que diz que nao existe
+      'Nos temos uma mensalidade'     // tela 7, texto literal do documento
+    ];
+    const ocorrencias = [...fonte.matchAll(/mensal\w*/gi)].map(m =>
+      fonte.slice(Math.max(0, m.index - 40), m.index + 40).replace(/\s+/g, ' '));
+    const proibidas = ocorrencias.filter(c => !permitidos.some(p => c.includes(p)));
+    assert.equal(proibidas.length, 0, '"mensal" fora dos lugares permitidos:\n' + proibidas.join('\n'));
+    // Lookbehind obrigatorio: 29,99 e 59,99 contem "9,99" como substring.
+    assert.ok(!/(?<!\d)9,99/.test(fonte), 'o preco mensal extinto (9,99) nao pode estar no arquivo');
+    console.log(`ok  2. "mensal" aparece ${ocorrencias.length}x, todas permitidas; nenhum 9,99`);
+  }
+
+  /* 3. Eventos: ViewContent no inicio, Lead so na tela de preco. */
   {
     const { ctx, page } = await abrir(browser);
     await page.evaluate(() => { window.__ev = []; window.fbq = (...a) => window.__ev.push(a); });
-    for (const p of ['Começar', 'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar',
-                     'Sim, é difícil', 'Sim, entendo', 'Quero']) await toque(page, p);
-    let eventos = await page.evaluate(() => window.__ev.map(e => e[1]));
-    assert.ok(!eventos.includes('Lead'), 'Lead nao pode disparar antes da tela de preco');
+    for (const p of ATE_O_PRECO.slice(0, -1)) await toque(page, p);
+    let ev = await page.evaluate(() => window.__ev.map(e => e[1]));
+    assert.ok(!ev.includes('Lead'), 'Lead nao pode disparar antes da tela 8');
     await toque(page, 'Faz sentido');
-    eventos = await page.evaluate(() => window.__ev.map(e => e[1]));
-    assert.equal(eventos.filter(e => e === 'Lead').length, 1, 'esperado 1 Lead na tela de preco');
-    assert.ok(eventos.includes('ViewContent'), 'ViewContent deveria ter disparado no Comecar');
-    console.log('ok  3. ViewContent no inicio, Lead so na tela de preco');
+    ev = await page.evaluate(() => window.__ev.map(e => e[1]));
+    assert.equal(ev.filter(e => e === 'Lead').length, 1, 'esperado exatamente 1 Lead');
+    assert.ok(ev.includes('ViewContent'), 'ViewContent deveria disparar no Começar');
+    console.log('ok  3. ViewContent no inicio, Lead so na tela 8');
     await ctx.close();
   }
 
-  /* 3. A mensagem do WhatsApp le como frase de pessoa. */
+  /* 4. A mensagem do WhatsApp le como frase de pessoa. */
   {
     const { ctx, page } = await abrir(browser);
-    for (const p of ['Começar', 'Treino e estudo', 'Filosofia', 'Estoicismo', 'Continuar', 'Continuar',
-                     'Sim, é difícil', 'Sim, entendo', 'Quero', 'Faz sentido']) await toque(page, p);
-    await page.getByRole('button', { name: /Anual/ }).click();
+    for (const p of ['Começar', 'Faço ambos', 'Filosofia', 'Teologia', 'Continuar',
+                     'Com certeza', 'Faz sentido', 'Faz sentido', 'Se encaixa', 'Anual']) await toque(page, p);
 
     const href = await page.getAttribute('a.acao', 'href');
     assert.ok(href.startsWith('https://wa.me/5541997067289?text='), 'numero errado: ' + href);
@@ -107,120 +107,120 @@ async function cabeNaTela(page, onde) {
     const msg = decodeURIComponent(href.split('text=')[1]);
     assert.ok(msg.startsWith('Olá! Fiz o quiz do site.'), 'primeira linha fixa quebrou: ' + msg);
     assert.equal(msg,
-      'Olá! Fiz o quiz do site.\nTreino e estudo\nEstudo filosofia e estoicismo.\nO anual se encaixa pra mim.',
+      'Olá! Fiz o quiz do site.\nFaço ambos\nEstudo filosofia e teologia.\nO anual se encaixa pra mim.',
       'mensagem fora do formato:\n' + msg);
-    assert.ok(!/[•\-*]|Dados do quiz|utm_|fbclid/i.test(msg), 'mensagem nao pode ter marcador nem rastreio');
+    assert.ok(!/[•*]|Dados do quiz|utm_|fbclid/i.test(msg), 'nada de marcador nem rastreio');
     console.log('ok  4. mensagem comeca com a linha fixa e le como pessoa');
     await ctx.close();
   }
 
-  /* 4. Sem tema informado, a linha de temas some. */
+  /* 5. Quem nao estuda nao recebe a tela de temas, e a linha some. */
   {
     const { ctx, page } = await abrir(browser);
-    for (const p of ['Começar', 'Só treino', 'Sim', 'Continuar',
-                     'Sim, é difícil', 'Sim, entendo', 'Quero', 'Faz sentido']) await toque(page, p);
-    await page.getByRole('button', { name: /Trimestral/ }).click();
+    await toque(page, 'Começar');
+    await toque(page, 'Só treino');
+    assert.ok((await textoDaTela(page)).includes('E tem interesse em filosofia?'),
+      'quem so treina deveria receber a pergunta de interesse');
+    for (const p of ['Um pouco', 'Entendo', 'Faz sentido', 'Faz sentido', 'Se encaixa', 'Trimestral']) await toque(page, p);
     const msg = decodeURIComponent((await page.getAttribute('a.acao', 'href')).split('text=')[1]);
     assert.equal(msg, 'Olá! Fiz o quiz do site.\nSó treino\nO trimestral se encaixa pra mim.',
       'sem tema a linha deveria sumir:\n' + msg);
-    console.log('ok  5. sem tema, a linha de temas e omitida');
+    console.log('ok  5. ramificacao de quem nao estuda, e a linha de temas omitida');
     await ctx.close();
   }
 
-  /* 5. Todo "nao" termina no grupo gratuito, e nada tenta reverter. */
+  /* 6. Os tres "nao" terminam no grupo gratuito, sem insistencia. */
   {
-    const caminhos = [
-      ['degrau 1 (duas recusas)', ['Começar', 'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar',
-                                   'Não, acho fácil', 'Entendi', 'Nunca procurei']],
-      ['degrau 2 (duas recusas)', ['Começar', 'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar',
-                                   'Sim, é difícil', 'Não', 'Entendi', 'Mais ou menos']],
-      ['degrau 3 (sem segunda chance)', ['Começar', 'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar',
-                                         'Sim, é difícil', 'Sim, entendo', 'Não']],
-      ['taxa', ['Começar', 'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar',
-                'Sim, é difícil', 'Sim, entendo', 'Quero', 'Não']],
-      ['preco', ['Começar', 'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar',
-                 'Sim, é difícil', 'Sim, entendo', 'Quero', 'Faz sentido', 'Não se encaixa agora']]
+    const saidas = [
+      ['concordância', ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Não']],
+      ['taxa',         ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Não']],
+      ['preço',        ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Faz sentido', 'Faz sentido', 'Não se encaixa agora']]
     ];
-
-    for (const [nome, passos] of caminhos) {
+    for (const [nome, passos] of saidas) {
       const { ctx, page } = await abrir(browser);
       for (const p of passos) await toque(page, p);
-
-      const texto = await textoDaTela(page);
-      assert.ok(texto.includes('Tranquilo, sem problema nenhum'), `${nome}: nao terminou no grupo gratuito`);
-      assert.ok(!/tem certeza|espera|última chance|desconto|só hoje/i.test(texto), `${nome}: tentou reverter`);
-
+      const t = await textoDaTela(page);
+      assert.ok(t.includes('Tranquilo, sem problema nenhum'), `${nome}: nao terminou no grupo gratuito`);
+      assert.ok(!/tem certeza|espera|última chance|desconto|só hoje|vagas/i.test(t), `${nome}: tentou reverter`);
       const links = await page.evaluate(() => [...document.querySelectorAll('#tela a')].map(a => a.href));
       assert.equal(links.length, 1, `${nome}: a saida tem que ter um link so`);
       assert.ok(links[0].includes('chat.whatsapp.com'), `${nome}: link errado -> ${links[0]}`);
       await cabeNaTela(page, `saida do ${nome}`);
       await ctx.close();
     }
-    console.log('ok  6. os 5 caminhos de "nao" terminam no grupo gratuito, sem insistencia');
+    console.log('ok  6. as 3 saidas de "nao" caem no grupo gratuito, sem insistencia');
   }
 
-  /* 6. O link "como funciona?" nao pode gastar a retomada de quem nao recusou. */
+  /* 7. "Mais ou menos" segue em frente: a explicacao e a resposta. */
   {
     const { ctx, page } = await abrir(browser);
-    for (const p of ['Começar', 'Treino e estudo', 'Filosofia', 'Continuar', 'Continuar']) await toque(page, p);
-    const original = await textoDaTela(page);
-
-    await toque(page, 'como funciona?');
-    assert.ok((await textoDaTela(page)).includes('duas salas ativas'), 'o link deveria abrir a explicacao');
-    await toque(page, 'Entendi');
-
-    assert.equal(await textoDaTela(page), original,
-      'depois do link a pergunta deveria voltar igual, nao reescrita');
-
-    // E a retomada de verdade continua disponivel.
-    await toque(page, 'Nunca procurei');
-    await toque(page, 'Entendi');
-    assert.ok((await textoDaTela(page)).includes('Percebe como é difícil'),
-      'a recusa real deveria reescrever a pergunta');
-    console.log('ok  7. "como funciona?" nao consome a retomada; a recusa consome');
+    for (const p of ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Mais ou menos']) await toque(page, p);
+    assert.ok((await textoDaTela(page)).includes('Na nossa comunidade temos 3 chats'),
+      '"Mais ou menos" deveria seguir pra explicacao, nao sair');
+    console.log('ok  7. "Mais ou menos" segue pra explicacao');
     await ctx.close();
   }
 
-  /* 7. Pixel so depois do consentimento. */
+  /* 8. A tela de duvidas tem as cinco e volta pra taxa. */
+  {
+    const { ctx, page } = await abrir(browser);
+    for (const p of ['Começar', 'Faço ambos', 'Filosofia', 'Continuar', 'Com certeza']) await toque(page, p);
+    await toque(page, 'Tenho uma dúvida');
+    const t = await textoDaTela(page);
+    for (const q of ['Tem plano mensal?', 'Os debates têm horário fixo?', 'Quem está por trás?',
+                     'O grupo é ativo mesmo?', 'Onde vejo mais de vocês?']) {
+      assert.ok(t.includes(q), 'faltou a duvida: ' + q);
+    }
+    assert.ok(!TEM_PRECO.test(t), 'a tela de duvidas nao pode trazer valor');
+    await toque(page, 'Entendi');
+    assert.ok((await textoDaTela(page)).includes('Faz sentido para voce?'), '"Entendi" deveria levar a tela da taxa');
+    console.log('ok  8. 5 duvidas presentes, sem valor, e "Entendi" leva a taxa');
+    await ctx.close();
+  }
+
+  /* 9. Pixel so depois do consentimento. */
   {
     const { ctx, page } = await abrir(browser, { aceitar: false });
     assert.equal(await page.evaluate(() => typeof window.fbq !== 'undefined'), false,
       'pixel NAO pode carregar antes do consentimento');
-    await cabeNaTela(page, 'abertura com o aviso de cookies aberto');
+    await cabeNaTela(page, 'abertura com o aviso aberto');
     await page.click('[data-cookie="nao"]');
     assert.equal(await page.evaluate(() => typeof window.fbq !== 'undefined'), false,
       'pixel NAO pode carregar depois da recusa');
-    console.log('ok  8. pixel desligado sem consentimento, inclusive apos recusa');
+    console.log('ok  9. pixel desligado sem consentimento, inclusive apos recusa');
     await ctx.close();
   }
 
-  /* 8. Ramificacao da tela 3 e a condicional de filosofia. */
+  /* 10. Dobra de 390px: nenhuma tela do caminho principal pode rolar. */
   {
     const { ctx, page } = await abrir(browser);
-    await toque(page, 'Começar');
-    await toque(page, 'Treinava e estudava, mas parei');
-    assert.ok((await textoDaTela(page)).includes('E percebe a necessidade de voltar?'), 'pergunta errada pra quem parou');
-    await toque(page, 'Sim');
-    assert.ok((await textoDaTela(page)).includes('Nosso grupo aborda exatamente isso'), 'ponte errada pra quem parou');
-    await toque(page, 'Continuar');
-    await toque(page, 'Sim, é difícil');
-    assert.ok((await textoDaTela(page)).includes('voltar ao ritmo'), 'degrau 2 deveria usar a redacao de quem parou');
-    await ctx.close();
+    // Par explicito tela->acao: clicar num chip NAO troca de tela, entao
+    // listas paralelas saem do lugar e reportam a tela errada.
+    const passos = [
+      ['abertura',     'Começar'],
+      ['perfil',       'Faço ambos'],
+      ['temas',        'Filosofia'],     // chip: continua na mesma tela
+      ['temas',        'Continuar'],
+      ['concordância', 'Com certeza'],
+      ['como funciona','Faz sentido'],
+      ['taxa',         'Faz sentido'],
+      ['preço',        'Se encaixa']
+    ];
+    const alturas = {};
+    for (const [nome, acao] of passos) {
+      alturas[nome] = await page.evaluate(() => document.documentElement.scrollHeight);
+      await cabeNaTela(page, nome);
+      await toque(page, acao);
+    }
+    alturas['qual plano'] = await page.evaluate(() => document.documentElement.scrollHeight);
+    await cabeNaTela(page, 'qual plano');
 
-    const b = await abrir(browser);
-    await toque(b.page, 'Começar');
-    await toque(b.page, 'Só estudo');
-    assert.ok((await textoDaTela(b.page)).includes('Boa! Estuda quais temas?'), 'pergunta errada pra quem so estuda');
-    await toque(b.page, 'Faculdade');     // sem filosofia nem estoicismo
-    await toque(b.page, 'Continuar');
-    assert.ok((await textoDaTela(b.page)).includes('E tem interesse em filosofia?'),
-      'faltou a tela condicional de interesse em filosofia');
-    await toque(b.page, 'Um pouco');
-    assert.ok((await textoDaTela(b.page)).includes('Falamos sobre esses temas no grupo'), 'ponte errada');
-    console.log('ok  9. ramificacoes da tela 3, ponte e condicional de filosofia');
-    await b.ctx.close();
+    const rolam = Object.entries(alturas).filter(([, h]) => h > 844).map(([n, h]) => `${n} ${h}px`);
+    assert.equal(rolam.length, 0, 'tela rolando em 390x844: ' + rolam.join(', '));
+    console.log('ok 10. nenhuma das 9 telas rola em 390x844');
+    await ctx.close();
   }
 
   await browser.close();
-  console.log('\n9/9 passou.');
+  console.log('\n10/10 passou.');
 })().catch(e => { console.error('FALHOU:', e.message); process.exit(1); });
