@@ -48,7 +48,7 @@ body{
 
 /* Toque: sem atraso de 300ms, sem zoom no toque duplo, sem selecionar o
    texto ao segurar o botao. */
-button, a.acao, a.plano{
+button, a.acao, a.plano, a.linksec{
   touch-action:manipulation;
   -webkit-user-select:none;user-select:none;
 }
@@ -163,20 +163,6 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
 .bloco::before{content:"";position:absolute;left:0;top:.56em;width:6px;height:6px;border-radius:50%;background:var(--sol)}
 .bloco a{color:var(--fg)}
 
-/* ---------- duvidas ---------- */
-.duvida{border-bottom:1px solid var(--line)}
-.duvida:first-of-type{border-top:1px solid var(--line)}
-.duvida summary{
-  cursor:pointer;list-style:none;font-weight:600;font-size:.97rem;
-  min-height:50px;padding:14px 0;
-  display:flex;justify-content:space-between;gap:14px;align-items:center;
-}
-.duvida summary::-webkit-details-marker{display:none}
-.duvida summary::after{content:"+";color:var(--sol);font-weight:700;font-size:1.25rem;flex:none}
-.duvida[open] summary::after{content:"\2013"}
-.duvida p{padding:0 0 14px;font-size:.93rem;line-height:1.5;color:var(--muted)}
-.duvida p a{color:var(--fg)}
-
 /* ---------- precos ---------- */
 .planos{display:flex;flex-direction:column;gap:11px;margin-bottom:14px}
 .plano{
@@ -207,6 +193,7 @@ a.acao{display:block;text-align:center;text-decoration:none;line-height:24px}
   font:inherit;font-size:.9rem;color:var(--muted);
   text-decoration:underline;text-underline-offset:3px;
 }
+a.linksec{display:inline-block}
 .nota{margin-top:16px;font-size:.88rem;color:var(--muted);text-align:center}
 
 /* ---------- aviso de cookies ---------- */
@@ -297,7 +284,6 @@ var PROXIMO_DEBATE = 'Vida e Morte';
 // Trocar todo mes.
 var LIVRO_DO_MES = 'Vida Intelectual, do Sertillanges';
 
-var INSTAGRAM = 'https://www.instagram.com/ogustavopamplona';
 var SUBSTACK  = 'https://substack.com/@comunidadearete';
 
 var CHAVE_COOKIE = 'arete-cookies';   // mesma chave da landing: a escolha vale pro site todo
@@ -634,51 +620,16 @@ TELAS.comofunciona = function(){
   tela.appendChild(blocos);
 
   botaoAcao('Faz sentido', function(){ ir('taxa'); });
-  linkDiscreto('Tenho uma dúvida', function(){ ir('duvidas'); });
-};
-
-/* ---- 6. duvidas ---- */
-var DUVIDAS = [
-  ['Tem plano mensal?',
-   'Mensal nao fazemos. Como é um projeto de longo prazo, e ja cobramos um valor baixo, deixamos trimestral e anual. Mas parcelamos no cartão ou pix'],
-  ['Os debates têm horário fixo?',
-   'Os debates são fixos, sábado às 20. Mas deixo gravado'],
-  ['Quem está por trás?',
-   'Sou da área de educação física e nutrição, mas sempre gostei muito de filosofia. A comunidade não dá lucro por agora, reinvisto 100% no marketing dela'],
-  ['O grupo é ativo mesmo?',
-   'Pode conversar com os membros. Os debates são saudáveis, o pessoal se respeita, e tem os chats para tirar dúvidas']
-];
-
-function duvida(pergunta){
-  var d = document.createElement('details');
-  d.className = 'duvida';
-  var s = document.createElement('summary');
-  s.textContent = pergunta;
-  d.appendChild(s);
-  tela.appendChild(d);
-  return d;
-}
-
-TELAS.duvidas = function(){
-  limpar(); progresso(3);
-
-  DUVIDAS.forEach(function(par){
-    duvida(par[0]).appendChild(el('p', null, par[1]));
-  });
-
-  // A ultima resposta leva links, entao e montada a mao.
-  var p = el('p');
-  p.appendChild(document.createTextNode('Comunidade recente, estamos no '));
-  p.appendChild(link(INSTAGRAM, 'Instagram'));
-  p.appendChild(document.createTextNode(' e no '));
-  p.appendChild(link(SUBSTACK, 'Substack'));
-  duvida('Onde vejo mais de vocês?').appendChild(p);
-
-  var espaco = el('div');
-  espaco.style.height = '20px';
-  tela.appendChild(espaco);
-
-  botaoAcao('Entendi', function(){ ir('taxa'); });
+  // Link de verdade, nao botao: abre o WhatsApp direto, com a mensagem da duvida.
+  var r = el('div', 'rodape');
+  var d = document.createElement('a');
+  d.className = 'linksec';
+  d.textContent = 'Tenho uma dúvida';
+  d.href = linkWhatsApp(null);
+  d.rel = 'noopener';
+  d.addEventListener('click', function(){ evento('Contact', { origem: 'duvida' }); });
+  r.appendChild(d);
+  areaAcoes().appendChild(r);
 };
 
 /* ---- 7. o aviso da taxa — nenhum numero aqui ---- */

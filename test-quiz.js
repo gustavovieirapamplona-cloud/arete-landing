@@ -68,8 +68,6 @@ const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Fa
   {
     const fonte = fs.readFileSync(ARQUIVO, 'utf8');
     const permitidos = [
-      'Tem plano mensal?',            // a pergunta da duvida
-      'Mensal nao fazemos',           // a resposta que diz que nao existe
       'Nos temos uma mensalidade'     // tela 7, texto literal do documento
     ];
     const ocorrencias = [...fonte.matchAll(/mensal\w*/gi)].map(m =>
@@ -174,20 +172,26 @@ const ATE_O_PRECO = ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza', 'Fa
     await ctx.close();
   }
 
-  /* 8. A tela de duvidas tem as cinco e volta pra taxa. */
+  /* 8. "Tenho uma dúvida" na explicacao abre o WhatsApp direto. */
   {
     const { ctx, page } = await abrir(browser);
     for (const p of ['Faço ambos', 'Filosofia', 'Continuar', 'Com certeza']) await toque(page, p);
-    await toque(page, 'Tenho uma dúvida');
-    const t = await textoDaTela(page);
-    for (const q of ['Tem plano mensal?', 'Os debates têm horário fixo?', 'Quem está por trás?',
-                     'O grupo é ativo mesmo?', 'Onde vejo mais de vocês?']) {
-      assert.ok(t.includes(q), 'faltou a duvida: ' + q);
-    }
-    assert.ok(!TEM_PRECO.test(t), 'a tela de duvidas nao pode trazer valor');
-    await toque(page, 'Entendi');
-    assert.ok((await textoDaTela(page)).includes('Faz sentido para voce?'), '"Entendi" deveria levar a tela da taxa');
-    console.log('ok  8. 5 duvidas presentes, sem valor, e "Entendi" leva a taxa');
+
+    const link = page.locator('a.linksec', { hasText: 'Tenho uma dúvida' });
+    const href = await link.getAttribute('href');
+    assert.ok(href.startsWith('https://wa.me/5541997067289?text='), 'numero errado: ' + href);
+    assert.equal(decodeURIComponent(href.split('text=')[1]),
+      'Olá! Fiz o quiz do site.\nFaço ambos\nEstudo filosofia.\nFiquei com uma dúvida.',
+      'mensagem da duvida fora do formato');
+
+    await page.evaluate(() => {
+      window.__ev = []; window.fbq = (...a) => window.__ev.push(a);
+      document.addEventListener('click', e => { if (e.target.closest('a')) e.preventDefault(); });
+    });
+    await link.click();
+    assert.deepEqual(await page.evaluate(() => window.__ev), [['track', 'Contact', { origem: 'duvida' }]],
+      'o link deveria disparar Contact com origem duvida');
+    console.log('ok  8. "Tenho uma dúvida" abre o WhatsApp com a mensagem da duvida');
     await ctx.close();
   }
 
