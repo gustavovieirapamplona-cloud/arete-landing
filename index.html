@@ -168,71 +168,8 @@ footer{
 }
 footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
 footer a:hover{color:var(--fg)}
-
-/* ---------- aviso de cookies ---------- */
-.cookies{
-  position:fixed;left:0;right:0;bottom:0;z-index:50;
-  background:#161615;border-top:1px solid var(--line);
-  padding:16px 22px;
-  display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;
-}
-.cookies[hidden]{display:none}
-.cookies p{margin:0;font-size:.88rem;color:var(--muted);max-width:46em}
-.cookies a{color:var(--fg);text-decoration:underline}
-.cookies-btns{display:flex;gap:10px;flex:none}
-.cbtn{
-  font-family:inherit;font-size:.86rem;font-weight:700;
-  padding:9px 20px;border-radius:4px;cursor:pointer;
-  background:var(--sol);color:var(--bg);border:1px solid var(--sol);
-}
-.cbtn.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
-.cbtn.ghost:hover{color:var(--fg)}
 </style>
 
-<!-- Meta Pixel 1383933286459138 — só carrega DEPOIS do consentimento (LGPD) -->
-<script>
-(function(){
-  var ID = '1383933286459138', KEY = 'arete-cookies';
-
-  function carregarPixel(){
-    if (window.fbq) return;
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
-    (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', ID);
-    fbq('track', 'PageView');
-  }
-
-  // localStorage falha em aba anônima / cookies bloqueados: sem consentimento, sem pixel.
-  function ler(){ try { return localStorage.getItem(KEY); } catch(e){ return null; } }
-  function gravar(v){ try { localStorage.setItem(KEY, v); } catch(e){} }
-
-  var escolha = ler();
-  if (escolha === 'sim') carregarPixel();
-
-  document.addEventListener('DOMContentLoaded', function(){
-    var banner = document.getElementById('cookies');
-    if (banner && !escolha) banner.hidden = false;
-
-    if (banner) banner.addEventListener('click', function(e){
-      var resposta = e.target.getAttribute && e.target.getAttribute('data-cookie');
-      if (!resposta) return;
-      gravar(resposta);
-      banner.hidden = true;
-      if (resposta === 'sim') carregarPixel();
-    });
-
-    // Contact (não InitiateCheckout): o botão abre uma conversa, não um checkout.
-    // O de cima só rola a página, então não conta como intenção de nada.
-    var checkout = document.querySelector('.js-checkout');
-    if (checkout) checkout.addEventListener('click', function(){
-      if (window.fbq) fbq('track', 'Contact');
-    });
-  });
-})();
-</script>
 </head>
 <body>
 
@@ -356,7 +293,7 @@ footer a:hover{color:var(--fg)}
           <div class="plano-nota">Dá R$5 por mês — metade do preço do trimestral.</div>
         </div>
       </div>
-      <a class="btn js-checkout" href="https://wa.me/5541997067289?text=Oi%2C%20Gustavo.%20Vi%20a%20p%C3%A1gina%20do%20Aret%C3%A9%20e%20quero%20entrar%20no%20grupo.">Falar comigo no WhatsApp</a>
+      <a class="btn" href="https://wa.me/5541997067289?text=Oi%2C%20Gustavo.%20Vi%20a%20p%C3%A1gina%20do%20Aret%C3%A9%20e%20quero%20entrar%20no%20grupo.">Falar comigo no WhatsApp</a>
       <div class="paylogos">Quem responde sou eu · pagamento por Pix ou cartão</div>
     </div>
     <p class="lead">O preço é baixo de propósito, e não é ele o filtro — se fosse, bastaria cobrar caro e encher o grupo de quem pode pagar. O filtro é o que a gente espera de você depois que entrar. O anual sai pela metade porque quem se compromete com o ano é justamente quem eu quero lá dentro.</p>
@@ -413,14 +350,6 @@ footer a:hover{color:var(--fg)}
       <a href="https://instagram.com/ogustavopamplona">@ogustavopamplona</a>
     </span>
   </footer>
-</div>
-
-<div id="cookies" class="cookies" hidden>
-  <p>Uso cookies pra saber quem chegou aqui pelos anúncios — nada além disso. Você escolhe. <a href="privacidade.html">O que é coletado.</a></p>
-  <div class="cookies-btns">
-    <button type="button" class="cbtn ghost" data-cookie="nao">Recusar</button>
-    <button type="button" class="cbtn" data-cookie="sim">Aceitar</button>
-  </div>
 </div>
 
 </body>
